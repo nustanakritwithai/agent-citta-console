@@ -29,6 +29,12 @@ class PermissionLevel(str, Enum):
     FORBIDDEN = "forbidden"
 
 
+class ActionStatus(str, Enum):
+    PENDING_CONFIRMATION = "pending_confirmation"
+    CONFIRMED = "confirmed"
+    BLOCKED = "blocked"
+
+
 class RiskSeverity(str, Enum):
     LOW = "low"
     MEDIUM = "medium"
@@ -92,6 +98,7 @@ class CittaAction:
     action: str
     reason: str
     permission_level: str = PermissionLevel.SAFE.value
+    status: str | None = None
     target: str | None = None
     params: dict[str, Any] = field(default_factory=dict)
 
@@ -164,6 +171,9 @@ def validate_action(data: Mapping[str, Any]) -> dict[str, Any]:
         raise ValueError(f"action missing required fields: {', '.join(missing)}")
     normalized = dict(data)
     normalized.setdefault("permission_level", PermissionLevel.SAFE.value)
+    status = normalized.get("status")
+    if status is not None and status not in {item.value for item in ActionStatus}:
+        raise ValueError(f"unsupported action status: {status}")
     params = normalized.get("params")
     normalized["params"] = params if isinstance(params, dict) else {}
     return normalized

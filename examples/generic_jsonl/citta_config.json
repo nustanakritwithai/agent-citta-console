@@ -1,0 +1,10 @@
+{
+  "trace_path": "examples/generic_jsonl/trace.jsonl",
+  "actions_path": "examples/generic_jsonl/actions.jsonl",
+  "dashboard_path": "examples/generic_jsonl/dashboard.html",
+  "refresh_interval_seconds": 5,
+  "require_confirmation_for_medium": true,
+  "require_confirmation_for_dangerous": true,
+  "block_forbidden_actions": true,
+  "goal": "Build an MVP universal HTML control panel for agent traces."
+}

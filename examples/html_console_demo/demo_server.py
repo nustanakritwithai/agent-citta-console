@@ -11,13 +11,11 @@ if str(ROOT) not in sys.path:
 
 from citta_console.server import run_server
 
+CONFIG_PATH = ROOT / "examples" / "generic_jsonl" / "citta_config.json"
+
 
 def main() -> None:
-    run_server(
-        trace_path=ROOT / "examples" / "generic_jsonl" / "trace.jsonl",
-        actions_path=ROOT / "examples" / "generic_jsonl" / "actions.jsonl",
-        goal="Observe generic JSONL traces and dispatch safe next actions.",
-    )
+    run_server(config_path=str(CONFIG_PATH))
 
 
 if __name__ == "__main__":

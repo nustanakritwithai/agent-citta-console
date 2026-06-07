@@ -9,21 +9,25 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from citta_console.config import load_config
 from citta_console.observer import observe
 from citta_console.renderer import render_dashboard
 
-TRACE_PATH = ROOT / "examples" / "generic_jsonl" / "trace.jsonl"
-ACTIONS_PATH = ROOT / "examples" / "generic_jsonl" / "actions.jsonl"
-DASHBOARD_PATH = ROOT / "examples" / "html_console_demo" / "dashboard.html"
+CONFIG_PATH = ROOT / "examples" / "generic_jsonl" / "citta_config.json"
 
 
 def main() -> None:
+    config = load_config(str(CONFIG_PATH))
     report = observe(
-        TRACE_PATH,
-        actions_path=ACTIONS_PATH,
-        goal="Build an MVP universal HTML control panel for agent traces.",
+        ROOT / config.trace_path,
+        actions_path=ROOT / config.actions_path,
+        goal=config.goal,
     )
-    output_path = render_dashboard(report, DASHBOARD_PATH)
+    output_path = render_dashboard(
+        report,
+        ROOT / config.dashboard_path,
+        refresh_interval_seconds=config.refresh_interval_seconds,
+    )
     print(f"Wrote {output_path}")
     print(f"Decision: {report['decision']} - {report['reason']}")
 
