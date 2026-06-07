@@ -72,6 +72,31 @@ The core only understands Citta event/action/report schemas. Runtime-specific
 systems such as Hermes, OpenClaw, Codex, or Claude Code should integrate through
 adapters that translate their traces into the common schema.
 
+## See it in action
+
+The realistic demo simulates an autonomous coding agent improving a UI, hitting
+a test failure, then continuing to edit without inspecting the root cause. Citta
+Console turns that trace into an HTML dashboard with current state, detected
+risks, recommended actions, and action history.
+
+```bash
+python3 examples/realistic_demo/run_demo.py
+```
+
+Open:
+
+```text
+examples/realistic_demo/dashboard.html
+```
+
+You should see risks such as an unresolved test failure and edits after a failed
+test, with recommendations like `inspect_error`, `pause`, and `run_tests`.
+
+Body agents act. Traces remain. Citta observes. Actions continue.
+
+Walkthrough: [docs/demo_walkthrough.md](docs/demo_walkthrough.md)  
+Screenshot instructions: [docs/screenshots.md](docs/screenshots.md)
+
 ## Quickstart
 
 ```bash
