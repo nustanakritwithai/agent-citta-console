@@ -100,7 +100,7 @@ Then visit `http://127.0.0.1:8000`.
 
 ```bash
 pkg install python git
-git clone https://github.com/yourname/agent-citta-console
+git clone https://github.com/nustanakritwithai/agent-citta-console
 cd agent-citta-console
 pip install -e .
 python examples/generic_jsonl/run_demo.py
