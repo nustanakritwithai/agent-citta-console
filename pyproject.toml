@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-citta-console"
-version = "0.7.0"
+version = "0.8.0"
 description = "A universal HTML control panel for agent awareness and action chaining."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -40,6 +40,9 @@ citta-console = "citta_console.cli:main"
 [tool.setuptools.packages.find]
 include = ["citta_console*"]
 
+[tool.setuptools.package-data]
+"citta_console.skills.hermes_citta_skill" = ["README.md", "skill.json", "examples/*"]
+
 [tool.pytest.ini_options]
-testpaths = ["tests", "skills"]
+testpaths = ["tests"]
 pythonpath = ["."]
