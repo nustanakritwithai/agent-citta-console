@@ -41,6 +41,11 @@ Built-in names:
 - `codex`
 - `claude_code`
 
+Adapters are also available through local MCP-style tools such as
+`citta.list_adapters`, `citta.describe_adapter`, and
+`citta.observe_with_adapter`. This is a local MCP-style foundation, not a
+complete MCP server yet.
+
 ## Generic JSONL
 
 The generic adapter reads `trace.jsonl`, reads/writes `actions.jsonl`, exposes a

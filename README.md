@@ -251,6 +251,34 @@ runtime proof-of-concept, OpenClaw as a contract-compliant stub, and local
 transcript mock adapters for Codex and Claude Code. These adapters do not call
 external APIs or execute runtime actions.
 
+## Local MCP-style tools
+
+v0.4 exposes Citta operations through a local tool dispatcher and CLI.
+
+This is a local MCP-style foundation, not a complete MCP server yet.
+
+Examples:
+
+```bash
+citta-console tool citta.list_adapters
+citta-console tool citta.describe_adapter --json '{"adapter":"generic"}'
+citta-console tool citta.observe --json '{"trace_path":"examples/generic_jsonl/trace.jsonl","actions_path":"examples/generic_jsonl/actions.jsonl","dashboard_path":"examples/generic_jsonl/dashboard.html"}'
+```
+
+Built-in tools include:
+
+- `citta.observe`
+- `citta.render_dashboard`
+- `citta.read_events`
+- `citta.read_actions`
+- `citta.write_action`
+- `citta.list_adapters`
+- `citta.describe_adapter`
+- `citta.observe_with_adapter`
+
+The tool dispatcher calls local Citta functions only. It does not call external
+APIs or execute shell, deploy, git push, or delete operations.
+
 ## Roadmap
 
 ### v0.1
@@ -280,7 +308,15 @@ external APIs or execute runtime actions.
 - Codex/Claude Code transcript mock adapters
 - adapter contract tests
 
-### v0.4+
+### v0.4
+
+- local MCP-style tool definitions
+- local tool dispatcher
+- CLI entrypoint for tool calls
+- stdio JSON-lines skeleton for future MCP work
+- tool dispatcher tests
+
+### v0.5+
 
 - file diff and test failure viewers
 - plugin system and custom risk rules

@@ -7,13 +7,16 @@ from .observer import observe, observe_with_adapter
 from .recommender import recommend_actions
 from .renderer import render_dashboard
 from .risk_detector import detect_risks
+from .tools import dispatch_tool, list_tool_definitions
 from .trace_reader import read_recent_events, read_trace
 
 __all__ = [
     "analyze_current_state",
     "detect_risks",
     "dispatch_action",
+    "dispatch_tool",
     "default_config",
+    "list_tool_definitions",
     "load_config",
     "observe",
     "observe_with_adapter",
@@ -23,4 +26,4 @@ __all__ = [
     "render_dashboard",
 ]
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
