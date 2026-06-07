@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.8.0 - Installable Hermes Citta Skill
+
+- Moved Hermes Citta Skill into the installable package
+- Added citta-console hermes observe
+- Added package import support for citta_console.skills.hermes_citta_skill
+- Added CLI and packaging tests
+- Kept skill experimental and non-executing
+
 ## v0.7.0 - GitHub Pages Demo
 
 - Added static demo landing page

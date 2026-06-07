@@ -345,7 +345,24 @@ Hermes-style activity as Citta-compatible trace events and generates a Citta
 Console dashboard.
 
 - Docs: [docs/hermes_citta_skill.md](docs/hermes_citta_skill.md)
-- Skill folder: [skills/hermes_citta_skill/](skills/hermes_citta_skill/)
+- Skill package: [citta_console/skills/hermes_citta_skill/](citta_console/skills/hermes_citta_skill/)
+
+Python usage:
+
+```python
+from citta_console.skills.hermes_citta_skill import HermesCittaSkill
+```
+
+CLI usage:
+
+```bash
+citta-console hermes observe \
+  --trace path/to/citta_trace.jsonl \
+  --actions path/to/actions.jsonl \
+  --dashboard path/to/dashboard.html \
+  --goal "Hermes Citta Skill trial" \
+  --task-id "task_001"
+```
 
 It does not execute recommended actions, modify Hermes runtime, call external
 APIs, or claim real consciousness.

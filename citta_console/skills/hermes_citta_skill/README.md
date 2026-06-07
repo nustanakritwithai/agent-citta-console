@@ -22,10 +22,21 @@ This skill does not:
 ## Run the observer demo
 
 ```bash
-python skills/hermes_citta_skill/run_observer.py \
-  --trace skills/hermes_citta_skill/examples/citta_trace.jsonl \
-  --actions skills/hermes_citta_skill/examples/actions.jsonl \
-  --dashboard skills/hermes_citta_skill/examples/dashboard.html \
+python -m citta_console.skills.hermes_citta_skill.run_observer \
+  --trace citta_console/skills/hermes_citta_skill/examples/citta_trace.jsonl \
+  --actions citta_console/skills/hermes_citta_skill/examples/actions.jsonl \
+  --dashboard citta_console/skills/hermes_citta_skill/examples/dashboard.html \
+  --goal "Test Hermes Citta Skill" \
+  --task-id "hermes_skill_test_001"
+```
+
+Or through the installed CLI:
+
+```bash
+citta-console hermes observe \
+  --trace citta_console/skills/hermes_citta_skill/examples/citta_trace.jsonl \
+  --actions citta_console/skills/hermes_citta_skill/examples/actions.jsonl \
+  --dashboard citta_console/skills/hermes_citta_skill/examples/dashboard.html \
   --goal "Test Hermes Citta Skill" \
   --task-id "hermes_skill_test_001"
 ```
@@ -33,7 +44,7 @@ python skills/hermes_citta_skill/run_observer.py \
 Open:
 
 ```text
-skills/hermes_citta_skill/examples/dashboard.html
+citta_console/skills/hermes_citta_skill/examples/dashboard.html
 ```
 
 Expected detected risks:

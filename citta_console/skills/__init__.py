@@ -1,0 +1,1 @@
+"""Installable Citta skill packages."""
