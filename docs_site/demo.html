@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>agent-citta-console demo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <p class="eyebrow">Realistic demo</p>
+      <h1>UI refactor with test failure</h1>
+      <p class="lead">
+        This page explains the static demo fixture. Open the generated dashboard
+        to see how Citta Console turns trace events into state, risks, and
+        recommended next actions.
+      </p>
+      <div class="actions">
+        <a class="button primary" href="../examples/realistic_demo/dashboard.html">Open dashboard fixture</a>
+        <a class="button" href="index.html">Back to overview</a>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Scenario</h2>
+        <p>
+          An autonomous coding agent edits UI files, runs tests, receives a
+          dashboard rendering failure, and continues editing without inspecting
+          the failure first.
+        </p>
+      </article>
+      <article class="card">
+        <h2>Trace source</h2>
+        <p>
+          The demo reads <code>examples/realistic_demo/trace.jsonl</code> and
+          <code>examples/realistic_demo/actions.jsonl</code>.
+        </p>
+      </article>
+    </section>
+
+    <section>
+      <h2>Detected risks</h2>
+      <div class="grid">
+        <article class="card risk">
+          <h3>Unresolved test failure</h3>
+          <p><code>test_dashboard_rendering</code> failed after the first UI edit.</p>
+        </article>
+        <article class="card risk">
+          <h3>Edit after failed test</h3>
+          <p>The code agent changed renderer files after the failed test without inspecting the error.</p>
+        </article>
+        <article class="card warning">
+          <h3>Possible loop / goal drift</h3>
+          <p>Repeated UI edits with low confidence suggest the agent may be moving without a clear diagnosis.</p>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <h2>Recommended actions</h2>
+      <div class="grid">
+        <article class="card recommendation">
+          <h3><code>inspect_error</code></h3>
+          <p>Inspect the latest failed test before editing more files.</p>
+        </article>
+        <article class="card recommendation">
+          <h3><code>pause</code></h3>
+          <p>Pause agent edits so the failure does not get buried under more changes.</p>
+        </article>
+        <article class="card recommendation">
+          <h3><code>run_tests</code></h3>
+          <p>Re-run tests after diagnosis and targeted fixes.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Run locally</h2>
+      <pre><code>python3 examples/realistic_demo/run_demo.py
+python3 -m http.server 8000</code></pre>
+      <p>
+        Then open
+        <code>http://localhost:8000/examples/realistic_demo/dashboard.html</code>.
+      </p>
+    </section>
+  </main>
+
+  <footer class="shell">
+    Static demo only: no backend, no external API calls, no destructive runtime
+    actions, and no claim of real consciousness.
+  </footer>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>agent-citta-console</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <p class="eyebrow">Static demo</p>
+      <h1>agent-citta-console</h1>
+      <p class="lead">
+        A universal HTML control panel for agent awareness and action chaining.
+        Body agents act, traces remain, Citta observes, and actions continue.
+      </p>
+      <div class="actions">
+        <a class="button primary" href="demo.html">View the demo explanation</a>
+        <a class="button" href="../examples/realistic_demo/dashboard.html">Open demo dashboard</a>
+        <a class="button" href="https://github.com/nustanakritwithai/agent-citta-console">GitHub repo</a>
+      </div>
+    </section>
+
+    <section>
+      <h2>The core loop</h2>
+      <div class="grid loop">
+        <article class="card">
+          <h3>Body agents act</h3>
+          <p>Code, test, search, file, and UI agents do work in their own runtime.</p>
+        </article>
+        <article class="card">
+          <h3>Traces remain</h3>
+          <p>Every action leaves JSONL events, logs, diffs, command output, or state.</p>
+        </article>
+        <article class="card">
+          <h3>Citta observes</h3>
+          <p>The console reads traces, summarizes state, detects risks, and recommends next actions.</p>
+        </article>
+        <article class="card">
+          <h3>Actions continue</h3>
+          <p>Selected intentions are logged to actions JSONL for the runtime adapter to inspect.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>What the demo shows</h2>
+        <p>
+          The realistic demo simulates a coding agent improving a UI, hitting a
+          test failure, and continuing to edit before inspecting the root cause.
+        </p>
+      </article>
+      <article class="card warning">
+        <h2>What Citta notices</h2>
+        <p>
+          The dashboard highlights unresolved test failure, edits after a failed
+          test, and possible goal drift from low-confidence edits.
+        </p>
+      </article>
+      <article class="card recommendation">
+        <h2>What Citta recommends</h2>
+        <p>
+          Recommended actions include <code>inspect_error</code>,
+          <code>pause</code>, and <code>run_tests</code>.
+        </p>
+      </article>
+    </section>
+
+    <section class="card">
+      <h2>Read more</h2>
+      <ul>
+        <li><a href="../README.md">Project README</a></li>
+        <li><a href="../docs/demo_walkthrough.md">Realistic demo walkthrough</a></li>
+        <li><a href="../docs/screenshots.md">Screenshot instructions</a></li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="shell">
+    This static site is documentation only. It does not run a backend, call
+    external APIs, execute shell commands, or claim real consciousness.
+  </footer>
+</body>
+</html>

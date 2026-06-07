@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.7.0 - GitHub Pages Demo
+
+- Added static demo landing page
+- Added GitHub Pages-ready docs site
+- Added visual Body -> Trace -> Citta -> Action explanation
+- Added live demo links and setup instructions
+
 ## v0.6.0 - Real Demo / Visual Proof
 
 - Realistic UI refactor demo scenario
