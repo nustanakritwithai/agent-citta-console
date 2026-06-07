@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Citta Console</title>
+
+  <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+    body { margin: 0; background: #10141c; color: #edf2f7; }
+    header { padding: 2rem; background: linear-gradient(135deg, #172033, #1a365d); border-bottom: 1px solid #2d3748; }
+    main { display: grid; gap: 1rem; padding: 1rem; max-width: 1180px; margin: 0 auto; }
+    section, .card { background: #151b29; border: 1px solid #2d3748; border-radius: 14px; padding: 1rem; box-shadow: 0 8px 24px rgb(0 0 0 / 18%); }
+    h1, h2 { margin-top: 0; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+    th, td { border-bottom: 1px solid #2d3748; padding: 0.55rem; text-align: left; vertical-align: top; }
+    th { color: #bee3f8; }
+    .badge { display: inline-block; padding: 0.2rem 0.55rem; border-radius: 999px; background: #2d3748; margin: 0.1rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .action-form { display: inline-flex; align-items: center; gap: 0.5rem; }
+    button, .link-button { border: 0; border-radius: 8px; padding: 0.7rem 1rem; cursor: pointer; font-weight: 700; text-decoration: none; display: inline-block; }
+    .action-safe { background: #2f855a; color: white; }
+    .action-medium { background: #b7791f; color: white; }
+    .action-dangerous { background: #c53030; color: white; }
+    .action-forbidden { background: #742a2a; color: white; }
+    .link-button { background: #2b6cb0; color: white; }
+    .risk-low { color: #90cdf4; }
+    .risk-medium { color: #f6e05e; }
+    .risk-high { color: #fc8181; }
+    .risk-critical { color: #feb2b2; font-weight: 700; }
+    .warning { color: #fbd38d; font-weight: 700; }
+    .empty { color: #a0aec0; }
+    .status { border-radius: 999px; background: #2d3748; padding: 0.1rem 0.45rem; white-space: nowrap; }
+    .status-pending_confirmation { background: #975a16; color: white; }
+    .status-confirmed { background: #276749; color: white; }
+    .status-blocked { background: #9b2c2c; color: white; }
+    code { background: #252f43; padding: 0.1rem 0.3rem; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Citta Console</h1>
+    <p>A universal HTML control panel for agent awareness and action chaining.</p>
+    <p><strong>Task:</strong> <a class="link-button" href="/task/hermes_runtime_hook_demo_001">hermes_runtime_hook_demo_001</a> &middot;
+       <strong>Status:</strong> <code>test_failed_after_file_edit</code></p>
+    <p><strong>Goal:</strong> Hermes runtime hook demo</p>
+    <p><strong>Auto-refresh: disabled</strong></p>
+  </header>
+  <main>
+    <section>
+      <h2>Current State</h2>
+      <p>user user_input (completed); hermes edit_file on src/ui.py (completed); test_agent run_tests on python -m pytest (failed); hermes edit_file on src/ui.py (completed); hermes final_answer (completed).</p>
+      <p><strong>Decision:</strong> inspect_error - A test failed and edits continued afterward.</p>
+    </section>
+
+    <section>
+      <h2>Active Agents</h2>
+      <span class="badge">user</span><span class="badge">hermes</span><span class="badge">test_agent</span>
+    </section>
+
+    <section>
+      <h2>Risks</h2>
+      <ul class="risks"><li class="risk-medium"><strong>Medium:</strong> failed_event_detected - test_agent reported failed during run_tests.</li>
+<li class="risk-high"><strong>High:</strong> edit_after_failed_test - A file was edited after a failed test without inspecting the error.</li>
+<li class="risk-medium"><strong>Medium:</strong> no_test_after_code_edit - Code changed and no later test event has been recorded.</li>
+<li class="risk-low"><strong>Low:</strong> goal_drift_possible - Recent events report low confidence, low goal alignment, or an explicit goal-drift hint while a goal is active.</li></ul>
+    </section>
+
+    <section>
+      <h2>Recommended Actions</h2>
+      <p class="empty">Medium and dangerous actions create a pending confirmation record before they can be confirmed.</p>
+      <div class="actions"><form method="post" action="/action" class="action-form">
+  <input type="hidden" name="task_id" value="hermes_runtime_hook_demo_001">
+  <input type="hidden" name="action" value="inspect_error">
+  <input type="hidden" name="reason" value="A test failed and edits continued afterward.">
+  <input type="hidden" name="permission_level" value="safe">
+  <button class="action action-safe" type="submit">Inspect Error</button>
+  
+</form>
+<form method="post" action="/action" class="action-form">
+  <input type="hidden" name="task_id" value="hermes_runtime_hook_demo_001">
+  <input type="hidden" name="action" value="pause">
+  <input type="hidden" name="reason" value="Pause before more edits hide the root cause.">
+  <input type="hidden" name="permission_level" value="medium">
+  <button class="action action-medium" type="submit">Pause Agents</button>
+  
+</form>
+<form method="post" action="/action" class="action-form">
+  <input type="hidden" name="task_id" value="hermes_runtime_hook_demo_001">
+  <input type="hidden" name="action" value="run_tests">
+  <input type="hidden" name="reason" value="Code changed without a later test event.">
+  <input type="hidden" name="permission_level" value="medium">
+  <button class="action action-medium" type="submit">Run Tests</button>
+  
+</form>
+<form method="post" action="/action" class="action-form">
+  <input type="hidden" name="task_id" value="hermes_runtime_hook_demo_001">
+  <input type="hidden" name="action" value="view_diff">
+  <input type="hidden" name="reason" value="Review file changes before continuing.">
+  <input type="hidden" name="permission_level" value="safe">
+  <button class="action action-safe" type="submit">View Diff</button>
+  
+</form>
+<form method="post" action="/action" class="action-form">
+  <input type="hidden" name="task_id" value="hermes_runtime_hook_demo_001">
+  <input type="hidden" name="action" value="redirect">
+  <input type="hidden" name="reason" value="Re-anchor the active agents to the goal.">
+  <input type="hidden" name="permission_level" value="medium">
+  <button class="action action-medium" type="submit">Redirect Task</button>
+  
+</form></div>
+    </section>
+
+    <section>
+      <h2>Recent Trace</h2>
+      <table><thead><tr><th>Time</th><th>Agent</th><th>Action</th><th>Target</th><th>Status</th><th>Error</th></tr></thead><tbody><tr><td>2026-06-07T11:16:09+00:00</td><td>user</td><td>user_input</td><td></td><td><span class="status">completed</span></td><td></td></tr>
+<tr><td>2026-06-07T11:16:09+00:00</td><td>hermes</td><td>edit_file</td><td>src/ui.py</td><td><span class="status">completed</span></td><td></td></tr>
+<tr><td>2026-06-07T11:16:09+00:00</td><td>test_agent</td><td>run_tests</td><td>python -m pytest</td><td><span class="status">failed</span></td><td>test_ui_render failed</td></tr>
+<tr><td>2026-06-07T11:16:09+00:00</td><td>hermes</td><td>edit_file</td><td>src/ui.py</td><td><span class="status">completed</span></td><td></td></tr>
+<tr><td>2026-06-07T11:16:09+00:00</td><td>hermes</td><td>final_answer</td><td></td><td><span class="status">completed</span></td><td></td></tr></tbody></table>
+    </section>
+
+    <section>
+      <h2>Action History</h2>
+      <p class="empty">No actions recorded yet.</p>
+    </section>
+  </main>
+</body>
+</html>

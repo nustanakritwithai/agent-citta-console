@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.9.0 - Hermes Runtime Trace Hook
+
+- Added opt-in Hermes runtime trace hook
+- Added environment-based hook config helper
+- Added vipaka_check and command_result event mapping
+- Added runtime hook demo
+- Added tests and docs for controlled Hermes trace capture
+
 ## v0.8.1 - Hermes Citta Metadata Signals
 
 - Added metadata support to Hermes Citta Skill trace writer methods

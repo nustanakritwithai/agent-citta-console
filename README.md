@@ -345,6 +345,8 @@ Hermes-style activity as Citta-compatible trace events and generates a Citta
 Console dashboard.
 
 - Docs: [docs/hermes_citta_skill.md](docs/hermes_citta_skill.md)
+- Runtime hook docs: [docs/hermes_runtime_trace_hook.md](docs/hermes_runtime_trace_hook.md)
+- Runtime hook demo: [examples/hermes_runtime_hook/](examples/hermes_runtime_hook/)
 - Skill package: [citta_console/skills/hermes_citta_skill/](citta_console/skills/hermes_citta_skill/)
 
 Python usage:
@@ -387,6 +389,28 @@ skill.record_file_edit(
 The metadata stays inside the JSONL event. It helps Citta detect
 `goal_drift_possible` and recommend `redirect`, but the skill still only reports
 or records recommendations; it does not execute them.
+
+Runtime trace hook in v0.9.0:
+
+```python
+from citta_console.skills.hermes_citta_skill import HermesRuntimeTraceHook
+
+hook = HermesRuntimeTraceHook(
+    "runtime/citta_trials/task_001/citta_trace.jsonl",
+    enabled=True,
+    default_task_id="task_001",
+)
+hook.record_user_input("Improve UI and keep tests passing")
+hook.record_file_edit("src/ui.py", metadata={"confidence": 0.62})
+hook.record_command_result("python -m pytest", status="failed", error="test failed")
+hook.record_vipaka_check("Recommended actions recorded only")
+```
+
+The runtime hook is disabled by default and can also be configured through
+`HERMES_CITTA_TRACE_ENABLED=1`, `HERMES_CITTA_TRACE_PATH`, and
+`HERMES_CITTA_TASK_ID`. It is a controlled opt-in helper, not full Hermes runtime
+integration. It writes trace events only; recommended actions are reports and are
+not executed.
 
 ## Local MCP-style tools
 
