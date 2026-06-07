@@ -1,5 +1,15 @@
 # Changelog
 
+## v0.6.0 - Real Demo / Visual Proof
+
+- Realistic UI refactor demo scenario
+- Sample trace with test failure and risky continued edits
+- Sample action history
+- Generated static dashboard fixture
+- Demo walkthrough and screenshot instructions
+- README "See it in action" section
+- 50 tests
+
 ## v0.4.0 - MCP Foundation
 
 - Local MCP-style tools package
