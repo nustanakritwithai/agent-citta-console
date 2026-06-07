@@ -9,6 +9,29 @@ Body agents act. Citta observes traces. The console decides what happens next.
 Project status: early local-first releases. The core JSONL protocol, HTML
 console, adapter foundation, and local MCP-style tool dispatcher are available.
 
+## Live Demo
+
+GitHub Pages URL:
+
+```text
+https://nustanakritwithai.github.io/agent-citta-console/
+```
+
+If Pages is not enabled yet, open `docs_site/index.html` locally or run:
+
+```bash
+python3 -m http.server 8000
+```
+
+Then visit `http://localhost:8000/docs_site/`.
+
+Direct demo links:
+
+- Static site: [docs_site/index.html](docs_site/index.html)
+- Demo page: [docs_site/demo.html](docs_site/demo.html)
+- Realistic dashboard fixture: [examples/realistic_demo/dashboard.html](examples/realistic_demo/dashboard.html)
+- Walkthrough: [docs/demo_walkthrough.md](docs/demo_walkthrough.md)
+
 ## What is it?
 
 `agent-citta-console` is a small Python project that reads agent activity from a
