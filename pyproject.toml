@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-citta-console"
-version = "0.2.0"
+version = "0.3.0"
 description = "A universal HTML control panel for agent awareness and action chaining."
 readme = "README.md"
 requires-python = ">=3.10"

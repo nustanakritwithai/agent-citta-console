@@ -3,7 +3,7 @@
 from .analyzer import analyze_current_state
 from .config import default_config, load_config
 from .dispatcher import dispatch_action
-from .observer import observe
+from .observer import observe, observe_with_adapter
 from .recommender import recommend_actions
 from .renderer import render_dashboard
 from .risk_detector import detect_risks
@@ -16,10 +16,11 @@ __all__ = [
     "default_config",
     "load_config",
     "observe",
+    "observe_with_adapter",
     "read_recent_events",
     "read_trace",
     "recommend_actions",
     "render_dashboard",
 ]
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
