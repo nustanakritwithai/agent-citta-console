@@ -412,6 +412,14 @@ The runtime hook is disabled by default and can also be configured through
 integration. It writes trace events only; recommended actions are reports and are
 not executed.
 
+Redaction / secret masking in v0.10.0:
+
+Before JSONL trace writes, Citta applies a local best-effort redaction pass to
+trace events, including nested metadata. It masks common Authorization headers,
+bearer tokens, API keys, passwords, cookies, private keys, GitHub tokens, and
+secret-like key names. Masked values are written as `[REDACTED]`. Redaction is not
+a guarantee; do not intentionally put secrets in traces.
+
 ## Local MCP-style tools
 
 v0.4 exposes Citta operations through a local tool dispatcher and CLI.
