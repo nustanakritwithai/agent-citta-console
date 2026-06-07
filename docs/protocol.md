@@ -49,6 +49,13 @@ Forbidden actions are recorded as `blocked` by default.
 Every action must be logged. No action record implies execution by the core
 dispatcher; runtime adapters decide what to do with confirmed records.
 
+## Adapter protocol
+
+Adapters convert local runtime traces, transcripts, or framework files into the
+same event/action/report protocol. The core remains framework-agnostic: Hermes,
+OpenClaw, Codex, Claude Code, and future frameworks should all map into Citta
+events and actions before analysis or rendering.
+
 ## Report
 
 A report is the Citta observer's current view:

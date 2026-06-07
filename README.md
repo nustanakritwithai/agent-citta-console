@@ -224,8 +224,32 @@ The core does not depend on any agent framework. Adapters should translate
 runtime-specific logs, transcripts, task files, or blackboards into Citta events
 and watch `actions.jsonl` or an API endpoint for selected actions.
 
-The v0.1 MVP includes a generic JSONL adapter. Hermes, OpenClaw, Codex, and
-Claude Code adapters are represented as extension points.
+The adapter contract is:
+
+```python
+class CittaAdapter:
+    name: str
+
+    def read_events(self) -> list[CittaEvent]: ...
+    def read_actions(self) -> list[CittaAction]: ...
+    def write_action(self, action: CittaAction) -> None: ...
+    def describe_source(self) -> dict: ...
+```
+
+Example:
+
+```python
+from citta_console.adapters.registry import get_adapter
+from citta_console.observer import observe_with_adapter
+
+adapter = get_adapter("generic", config=config)
+observe_with_adapter(adapter, dashboard_path="dashboard.html")
+```
+
+The v0.3 foundation includes a generic JSONL adapter, a Hermes-like local
+runtime proof-of-concept, OpenClaw as a contract-compliant stub, and local
+transcript mock adapters for Codex and Claude Code. These adapters do not call
+external APIs or execute runtime actions.
 
 ## Roadmap
 
@@ -247,12 +271,20 @@ Claude Code adapters are represented as extension points.
 - task detail page
 - task filtering
 
-### v0.3+
+### v0.3
 
-- Hermes and OpenClaw adapters
-- Codex/Claude Code transcript adapters
+- stable adapter contract
+- adapter registry
+- improved generic adapter
+- Hermes-like local runtime proof-of-concept
+- Codex/Claude Code transcript mock adapters
+- adapter contract tests
+
+### v0.4+
+
 - file diff and test failure viewers
 - plugin system and custom risk rules
+- deeper framework adapters
 
 ## Philosophy
 
