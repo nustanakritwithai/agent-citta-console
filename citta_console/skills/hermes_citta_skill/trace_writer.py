@@ -9,6 +9,15 @@ from typing import Any
 from citta_console.schemas import now_iso, validate_event
 
 
+def _merge_metadata(defaults: dict[str, Any], metadata: dict[str, Any] | None = None) -> dict[str, Any]:
+    """Return default metadata safely overlaid with caller-provided metadata."""
+
+    merged = dict(defaults)
+    if metadata:
+        merged.update(metadata)
+    return merged
+
+
 def append_citta_event(
     trace_path: str | Path,
     *,
@@ -47,7 +56,12 @@ def append_citta_event(
     return event
 
 
-def record_user_input(trace_path: str | Path, task_id: str, content: str) -> dict[str, Any]:
+def record_user_input(
+    trace_path: str | Path,
+    task_id: str,
+    content: str,
+    metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     return append_citta_event(
         trace_path,
         task_id=task_id,
@@ -56,7 +70,7 @@ def record_user_input(trace_path: str | Path, task_id: str, content: str) -> dic
         status="completed",
         input=content,
         output="User request recorded",
-        metadata={"source": "hermes_citta_skill"},
+        metadata=_merge_metadata({"source": "hermes_citta_skill"}, metadata),
     )
 
 
@@ -68,6 +82,7 @@ def record_tool_call(
     status: str = "completed",
     output: str | None = None,
     error: str | None = None,
+    metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     return append_citta_event(
         trace_path,
@@ -77,7 +92,7 @@ def record_tool_call(
         status=status,
         output=output,
         error=error,
-        metadata={"tool": tool, "source": "hermes_citta_skill"},
+        metadata=_merge_metadata({"tool": tool, "source": "hermes_citta_skill"}, metadata),
     )
 
 
@@ -86,6 +101,7 @@ def record_file_edit(
     task_id: str,
     target: str,
     output: str | None = None,
+    metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     return append_citta_event(
         trace_path,
@@ -94,7 +110,9 @@ def record_file_edit(
         target=target,
         status="completed",
         output=output,
-        metadata={"files_changed": [target], "source": "hermes_citta_skill"},
+        metadata=_merge_metadata(
+            {"files_changed": [target], "source": "hermes_citta_skill"}, metadata
+        ),
     )
 
 
@@ -105,6 +123,7 @@ def record_test_result(
     status: str,
     output: str | None = None,
     error: str | None = None,
+    metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     return append_citta_event(
         trace_path,
@@ -116,7 +135,7 @@ def record_test_result(
         input=f"Run {command}",
         output=output,
         error=error,
-        metadata={"command": command, "source": "hermes_citta_skill"},
+        metadata=_merge_metadata({"command": command, "source": "hermes_citta_skill"}, metadata),
     )
 
 
@@ -125,6 +144,7 @@ def record_final_answer(
     task_id: str,
     content: str,
     status: str = "completed",
+    metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     return append_citta_event(
         trace_path,
@@ -132,7 +152,7 @@ def record_final_answer(
         action="final_answer",
         status=status,
         output=content,
-        metadata={"source": "hermes_citta_skill"},
+        metadata=_merge_metadata({"source": "hermes_citta_skill"}, metadata),
     )
 
 

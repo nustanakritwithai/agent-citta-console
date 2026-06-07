@@ -367,6 +367,27 @@ citta-console hermes observe \
 It does not execute recommended actions, modify Hermes runtime, call external
 APIs, or claim real consciousness.
 
+Metadata-backed signal quality in v0.8.1:
+
+```python
+skill.record_file_edit(
+    "task_001",
+    "src/ui.js",
+    output="Continued visual refactor",
+    metadata={
+        "confidence": 0.4,
+        "goal_alignment": "low",
+        "reason": "continued visual refactor despite failing test",
+        "inspected_error": False,
+        "source_state": "test_failed_after_file_edit",
+    },
+)
+```
+
+The metadata stays inside the JSONL event. It helps Citta detect
+`goal_drift_possible` and recommend `redirect`, but the skill still only reports
+or records recommendations; it does not execute them.
+
 ## Local MCP-style tools
 
 v0.4 exposes Citta operations through a local tool dispatcher and CLI.

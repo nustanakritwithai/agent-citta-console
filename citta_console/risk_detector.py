@@ -30,8 +30,37 @@ def _is_edit(event: dict[str, Any]) -> bool:
 def _has_inspection_after(events: list[dict[str, Any]], index: int) -> bool:
     return any(
         str(event.get("action", "")).lower() in {"inspect_error", "summarize_state"}
+        or (
+            isinstance(event.get("metadata"), dict)
+            and event["metadata"].get("inspected_error") is True
+        )
         for event in events[index + 1 :]
     )
+
+
+def _metadata(event: dict[str, Any]) -> dict[str, Any]:
+    metadata = event.get("metadata")
+    return metadata if isinstance(metadata, dict) else {}
+
+
+def _confidence(metadata: dict[str, Any]) -> float | None:
+    value = metadata.get("confidence")
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _is_low_goal_alignment(metadata: dict[str, Any]) -> bool:
+    value = metadata.get("goal_alignment")
+    if isinstance(value, str):
+        return value.lower() in {"low", "poor", "weak", "misaligned", "off_goal"}
+    try:
+        return value is not None and float(value) <= 0.45
+    except (TypeError, ValueError):
+        return False
 
 
 def detect_risks(
@@ -132,19 +161,34 @@ def detect_risks(
             )
 
     if goal:
-        low_confidence_events = [
-            event
-            for event in event_list[-5:]
-            if isinstance(event.get("metadata"), dict)
-            and event["metadata"].get("confidence") is not None
-            and float(event["metadata"].get("confidence", 1.0)) < 0.4
-        ]
-        if low_confidence_events:
+        goal_drift_events = []
+        for event in event_list[-5:]:
+            metadata = _metadata(event)
+            confidence = _confidence(metadata)
+            low_confidence = confidence is not None and confidence <= 0.45
+            low_goal_alignment = _is_low_goal_alignment(metadata)
+            explicit_hint = metadata.get("risk_hint") == "goal_drift_possible"
+            if low_confidence or low_goal_alignment or explicit_hint:
+                goal_drift_events.append(event)
+
+        if goal_drift_events:
+            latest = goal_drift_events[-1]
+            metadata = _metadata(latest)
             risks.append(
                 Risk(
                     type="goal_drift_possible",
                     severity="low",
-                    reason="Recent events report low confidence while a goal is active.",
+                    reason=(
+                        "Recent events report low confidence, low goal alignment, "
+                        "or an explicit goal-drift hint while a goal is active."
+                    ),
+                    event_id=latest.get("event_id"),
+                    target=latest.get("target"),
+                    metadata={
+                        key: metadata[key]
+                        for key in ("confidence", "goal_alignment", "reason", "source_state", "risk_hint")
+                        if key in metadata
+                    },
                 )
             )
 
