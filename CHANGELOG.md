@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.8.1 - Hermes Citta Metadata Signals
+
+- Added metadata support to Hermes Citta Skill trace writer methods
+- Preserved confidence, goal_alignment, reason, inspected_error, and source_state in trace metadata
+- Added tests for metadata-backed goal drift detection
+- Improved Hermes skill docs for signal quality
+
 ## v0.8.0 - Installable Hermes Citta Skill
 
 - Moved Hermes Citta Skill into the installable package

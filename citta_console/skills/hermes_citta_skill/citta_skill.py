@@ -32,8 +32,10 @@ class HermesCittaSkill:
         self.actions_path.parent.mkdir(parents=True, exist_ok=True)
         self.actions_path.touch(exist_ok=True)
 
-    def record_user_input(self, task_id: str, content: str) -> dict[str, Any]:
-        return record_user_input(self.trace_path, task_id, content)
+    def record_user_input(
+        self, task_id: str, content: str, metadata: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        return record_user_input(self.trace_path, task_id, content, metadata=metadata)
 
     def record_tool_call(
         self,
@@ -43,6 +45,7 @@ class HermesCittaSkill:
         status: str = "completed",
         output: str | None = None,
         error: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         return record_tool_call(
             self.trace_path,
@@ -52,6 +55,7 @@ class HermesCittaSkill:
             status=status,
             output=output,
             error=error,
+            metadata=metadata,
         )
 
     def record_file_edit(
@@ -59,8 +63,9 @@ class HermesCittaSkill:
         task_id: str,
         target: str,
         output: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        return record_file_edit(self.trace_path, task_id, target, output=output)
+        return record_file_edit(self.trace_path, task_id, target, output=output, metadata=metadata)
 
     def record_test_result(
         self,
@@ -69,6 +74,7 @@ class HermesCittaSkill:
         status: str,
         output: str | None = None,
         error: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         return record_test_result(
             self.trace_path,
@@ -77,6 +83,7 @@ class HermesCittaSkill:
             status,
             output=output,
             error=error,
+            metadata=metadata,
         )
 
     def record_final_answer(
@@ -84,8 +91,11 @@ class HermesCittaSkill:
         task_id: str,
         content: str,
         status: str = "completed",
+        metadata: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
-        return record_final_answer(self.trace_path, task_id, content, status=status)
+        return record_final_answer(
+            self.trace_path, task_id, content, status=status, metadata=metadata
+        )
 
     def observe(self, goal: str | None = None, task_id: str | None = None) -> dict[str, Any]:
         report = observe(

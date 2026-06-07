@@ -38,6 +38,24 @@ The skill records:
 - test results as `run_tests`
 - final answers as `final_answer`
 
+Each helper accepts optional `metadata` without changing the core Citta event
+schema. Metadata is preserved in JSONL and can improve signal quality with
+fields such as:
+
+- `confidence`: numeric confidence for the event or answer
+- `goal_alignment`: `low`, `medium`, `high`, or a numeric alignment score
+- `reason`: short explanation for why the event may be risky
+- `inspected_error`: whether the failed test/error was inspected before moving on
+- `source_state`: local state label such as `test_failed_after_file_edit`
+- `risk_hint`: optional hint such as `goal_drift_possible`
+- `notes`: free-form local notes
+
+Citta can use low `confidence`, low `goal_alignment`, or explicit `risk_hint`
+metadata to detect `goal_drift_possible` and recommend `redirect`. For example,
+if a task goal is "Improve UI and fix test failures" but the trace shows another
+visual refactor after a failed test with `inspected_error=false`, the observer can
+report goal drift without executing any action.
+
 ## Example command
 
 ```bash
