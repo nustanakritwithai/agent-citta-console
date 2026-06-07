@@ -34,3 +34,11 @@ The v0.2 live console adds:
 - task detail routing through `GET /task/{task_id}`.
 - confirmation routing for pending medium/dangerous actions.
 - action history rendering from `actions.jsonl`.
+
+The v0.4 MCP-style foundation adds:
+
+- `citta_console.tools` for local tool definitions, schemas, handlers, and dispatch.
+- `citta-console tool ...` for local JSON tool calls from agent runtimes.
+- a minimal stdio JSON-lines skeleton for future MCP transport work.
+
+This is a local MCP-style foundation, not a complete MCP server yet.
