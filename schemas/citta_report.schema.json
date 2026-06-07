@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/agent-citta-console/citta_report.schema.json",
+  "title": "Citta Report",
+  "type": "object",
+  "required": [
+    "time",
+    "task_id",
+    "current_state",
+    "active_agents",
+    "recent_events",
+    "risks",
+    "recommended_actions",
+    "decision",
+    "reason"
+  ],
+  "properties": {
+    "time": { "type": "string", "format": "date-time" },
+    "task_id": { "type": "string" },
+    "current_state": { "type": "string" },
+    "active_agents": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "recent_events": { "type": "integer", "minimum": 0 },
+    "summary": { "type": "string" },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "severity", "reason"],
+        "properties": {
+          "type": { "type": "string" },
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high", "critical"]
+          },
+          "reason": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "recommended_actions": {
+      "type": "array",
+      "items": { "$ref": "citta_action.schema.json" }
+    },
+    "decision": { "type": "string" },
+    "reason": { "type": "string" },
+    "events": {
+      "type": "array",
+      "items": { "$ref": "citta_event.schema.json" }
+    },
+    "action_history": {
+      "type": "array",
+      "items": { "$ref": "citta_action.schema.json" }
+    }
+  },
+  "additionalProperties": true
+}

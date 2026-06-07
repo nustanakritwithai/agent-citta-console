@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/agent-citta-console/citta_action.schema.json",
+  "title": "Citta Action",
+  "type": "object",
+  "required": ["time", "action_id", "task_id", "action", "reason"],
+  "properties": {
+    "time": { "type": "string", "format": "date-time" },
+    "action_id": { "type": "string" },
+    "task_id": { "type": "string" },
+    "action": {
+      "type": "string",
+      "enum": [
+        "continue",
+        "pause",
+        "stop",
+        "inspect_error",
+        "run_tests",
+        "view_diff",
+        "summarize_state",
+        "ask_user",
+        "redirect",
+        "rollback",
+        "approve",
+        "reject"
+      ]
+    },
+    "target": { "type": ["string", "null"] },
+    "reason": { "type": "string" },
+    "permission_level": {
+      "type": "string",
+      "enum": ["safe", "medium", "dangerous", "forbidden"]
+    },
+    "params": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
