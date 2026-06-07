@@ -41,5 +41,5 @@ citta-console = "citta_console.cli:main"
 include = ["citta_console*"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "skills"]
 pythonpath = ["."]
