@@ -28,9 +28,6 @@ dependencies = []
 [project.optional-dependencies]
 dev = ["pytest"]
 
-[project.scripts]
-citta-console-demo = "examples.generic_jsonl.run_demo:main"
-
 [tool.setuptools.packages.find]
 include = ["citta_console*"]
 

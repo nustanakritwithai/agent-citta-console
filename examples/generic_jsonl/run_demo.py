@@ -3,12 +3,15 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sys
+
+ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from citta_console.observer import observe
 from citta_console.renderer import render_dashboard
 
-
-ROOT = Path(__file__).resolve().parents[2]
 TRACE_PATH = ROOT / "examples" / "generic_jsonl" / "trace.jsonl"
 ACTIONS_PATH = ROOT / "examples" / "generic_jsonl" / "actions.jsonl"
 DASHBOARD_PATH = ROOT / "examples" / "html_console_demo" / "dashboard.html"

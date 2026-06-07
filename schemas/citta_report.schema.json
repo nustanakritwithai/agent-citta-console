@@ -42,7 +42,25 @@
     },
     "recommended_actions": {
       "type": "array",
-      "items": { "$ref": "citta_action.schema.json" }
+      "items": {
+        "type": "object",
+        "required": ["action", "label", "permission_level", "reason"],
+        "properties": {
+          "action": { "type": "string" },
+          "label": { "type": "string" },
+          "permission_level": {
+            "type": "string",
+            "enum": ["safe", "medium", "dangerous", "forbidden"]
+          },
+          "reason": { "type": "string" },
+          "target": { "type": ["string", "null"] },
+          "params": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": true
+      }
     },
     "decision": { "type": "string" },
     "reason": { "type": "string" },
