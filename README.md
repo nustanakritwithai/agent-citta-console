@@ -79,8 +79,11 @@ python examples/generic_jsonl/run_demo.py
 Open:
 
 ```text
-examples/html_console_demo/dashboard.html
+examples/generic_jsonl/dashboard.html
 ```
+
+The demo reads `examples/generic_jsonl/citta_config.json` for trace, action,
+dashboard, and auto-refresh settings.
 
 Run tests:
 
@@ -96,6 +99,14 @@ python examples/html_console_demo/demo_server.py
 
 Then visit `http://127.0.0.1:8000`.
 
+Live console routes:
+
+- `GET /` for the auto-refresh dashboard
+- `GET /task/{task_id}` for a task detail page
+- `GET /actions` for JSON action history
+- `POST /action` to record a selected action
+- `GET /confirm?action_id=...`, `POST /confirm`, and `POST /cancel` for confirmation flow
+
 ## Termux quickstart
 
 ```bash
@@ -107,6 +118,22 @@ python examples/generic_jsonl/run_demo.py
 ```
 
 The MVP uses the Python standard library at runtime.
+
+## Config file
+
+The local console can be configured with JSON:
+
+```json
+{
+  "trace_path": "examples/generic_jsonl/trace.jsonl",
+  "actions_path": "examples/generic_jsonl/actions.jsonl",
+  "dashboard_path": "examples/generic_jsonl/dashboard.html",
+  "refresh_interval_seconds": 5,
+  "require_confirmation_for_medium": true,
+  "require_confirmation_for_dangerous": true,
+  "block_forbidden_actions": true
+}
+```
 
 ## Event schema
 
@@ -152,6 +179,7 @@ Each selected action is appended to `actions.jsonl`:
   "target": "latest_failed_test",
   "reason": "Test failed after UI edit",
   "permission_level": "safe",
+  "status": "confirmed",
   "params": {
     "source": "trace.jsonl"
   }
@@ -172,8 +200,9 @@ The dashboard includes:
 - recent trace table
 - risks with severity
 - recommended action buttons
-- confirmation prompts for medium/dangerous actions
+- confirmation flow for medium/dangerous actions
 - action history
+- auto-refresh status
 
 ## Safety model
 
@@ -184,8 +213,10 @@ Actions are classified as:
 - `dangerous`: shell command, install, deploy, destructive file operations
 - `forbidden`: project deletion, production deploy, external publishing
 
-Every dispatched action must include a reason and is logged. Dangerous actions
-require explicit confirmation. Forbidden actions are blocked by default.
+Every dispatched action must include a reason and is logged. Medium and
+dangerous actions are recorded as `pending_confirmation` before they can be
+confirmed. Forbidden actions are blocked by default. The MVP does not execute
+shell, deploy, git push, or delete operations.
 
 ## Adapter model
 
@@ -210,9 +241,11 @@ Claude Code adapters are represented as extension points.
 
 - local server improvements
 - auto-refresh dashboard
-- better permission layer
+- config file for paths and live-console behavior
+- confirmation flow for medium/dangerous actions
+- action history panel
+- task detail page
 - task filtering
-- multi-agent view
 
 ### v0.3+
 

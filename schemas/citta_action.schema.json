@@ -31,6 +31,10 @@
       "type": "string",
       "enum": ["safe", "medium", "dangerous", "forbidden"]
     },
+    "status": {
+      "type": "string",
+      "enum": ["pending_confirmation", "confirmed", "blocked"]
+    },
     "params": {
       "type": "object",
       "additionalProperties": true

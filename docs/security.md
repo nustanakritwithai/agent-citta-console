@@ -36,6 +36,10 @@ Dangerous actions require explicit confirmation:
 - `deploy`
 - `modify_many_files`
 
+The local console records these as `pending_confirmation` first. `POST /confirm`
+appends a `confirmed` audit record, and `POST /cancel` appends a `blocked` audit
+record. The core dispatcher still does not execute the action.
+
 ## Forbidden by default
 
 These actions are blocked unless a deployment explicitly opts into them:
@@ -53,3 +57,5 @@ Rules:
 3. Dangerous actions require confirmation.
 4. File-changing actions should expose a diff.
 5. Destructive actions should have a rollback plan.
+6. The v0.2 core does not implement shell execution, deploy, git push, or delete
+   execution.

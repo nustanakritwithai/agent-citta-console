@@ -36,8 +36,18 @@ Required fields:
 - `action`
 - `reason`
 
-Every action must be logged. Dangerous actions require confirmation. Forbidden
-actions are blocked by default.
+Optional action status values:
+
+- `pending_confirmation`
+- `confirmed`
+- `blocked`
+
+Safe actions are recorded as `confirmed`. Medium and dangerous actions are
+recorded as `pending_confirmation` until a confirmation record is appended.
+Forbidden actions are recorded as `blocked` by default.
+
+Every action must be logged. No action record implies execution by the core
+dispatcher; runtime adapters decide what to do with confirmed records.
 
 ## Report
 

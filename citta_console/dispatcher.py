@@ -1,7 +1,7 @@
 """Dispatch selected Citta actions.
 
-The MVP dispatcher only appends actions to JSONL. Runtime-specific adapters can
-watch that file and decide how to execute the intention.
+The dispatcher only appends action records to JSONL. It never executes shell
+commands, deploys, deletes files, or performs runtime-specific side effects.
 """
 
 from __future__ import annotations
@@ -11,7 +11,8 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from .permissions import classify_action, validate_permission
-from .schemas import CittaAction, action_from_dict, make_id, now_iso
+from .schemas import ActionStatus, CittaAction, PermissionLevel, action_from_dict, make_id, now_iso
+from .storage import read_jsonl
 
 
 def prepare_action(action: Mapping[str, Any], task_id: str | None = None) -> CittaAction:
@@ -29,6 +30,7 @@ def prepare_action(action: Mapping[str, Any], task_id: str | None = None) -> Cit
     payload["action"] = action_name
     payload["reason"] = reason
     payload.setdefault("permission_level", classify_action(action_name))
+    payload.setdefault("status", ActionStatus.CONFIRMED.value)
     payload.setdefault("params", {})
     return action_from_dict(payload)
 
@@ -49,8 +51,105 @@ def dispatch_action(
     *,
     task_id: str | None = None,
     confirm: bool = False,
+    require_confirmation_for_medium: bool = True,
+    require_confirmation_for_dangerous: bool = True,
+    block_forbidden_actions: bool = True,
 ) -> dict[str, Any]:
+    """Append an action record with confirmation status.
+
+    Safe actions are recorded as confirmed. Medium and dangerous actions are
+    recorded as pending confirmation unless `confirm=True` or the relevant
+    confirmation requirement is disabled. Forbidden actions are blocked by
+    default and still logged for auditability.
+    """
+
     prepared = prepare_action(action, task_id=task_id)
-    level = validate_permission(prepared.to_dict(), confirm=confirm)
+    level = classify_action(prepared.action)
     prepared.permission_level = level
+
+    if level == PermissionLevel.FORBIDDEN.value and block_forbidden_actions:
+        prepared.status = ActionStatus.BLOCKED.value
+        prepared.reason = f"Blocked forbidden action: {prepared.reason}"
+        return write_action(path, prepared)
+
+    needs_confirmation = (
+        (level == PermissionLevel.MEDIUM.value and require_confirmation_for_medium)
+        or (level == PermissionLevel.DANGEROUS.value and require_confirmation_for_dangerous)
+    )
+    if needs_confirmation and not confirm:
+        prepared.status = ActionStatus.PENDING_CONFIRMATION.value
+        return write_action(path, prepared)
+
+    validate_permission(prepared.to_dict(), confirm=confirm)
+    prepared.status = ActionStatus.CONFIRMED.value
     return write_action(path, prepared)
+
+
+def read_actions(
+    path: str | Path,
+    limit: int = 20,
+    *,
+    task_id: str | None = None,
+) -> list[dict[str, Any]]:
+    actions = read_jsonl(path)
+    if task_id:
+        actions = [action for action in actions if action.get("task_id") == task_id]
+    if limit <= 0:
+        return []
+    return actions[-limit:]
+
+
+def find_action(path: str | Path, action_id: str) -> dict[str, Any] | None:
+    for action in reversed(read_jsonl(path)):
+        if action.get("action_id") == action_id:
+            return action
+    return None
+
+
+def confirm_action(path: str | Path, action_id: str, reason: str | None = None) -> dict[str, Any]:
+    original = find_action(path, action_id)
+    if not original:
+        raise ValueError(f"action not found: {action_id}")
+    if original.get("status") == ActionStatus.BLOCKED.value:
+        raise ValueError(f"blocked action cannot be confirmed: {action_id}")
+
+    params = dict(original.get("params") or {})
+    params["confirmed_action_id"] = action_id
+    record = {
+        "task_id": original.get("task_id", "default"),
+        "action": original.get("action"),
+        "target": original.get("target"),
+        "reason": reason or f"Confirmed action {action_id}: {original.get('reason', '')}",
+        "permission_level": original.get("permission_level", PermissionLevel.SAFE.value),
+        "status": ActionStatus.CONFIRMED.value,
+        "params": params,
+    }
+    return dispatch_action(
+        record,
+        path,
+        confirm=True,
+        require_confirmation_for_medium=False,
+        require_confirmation_for_dangerous=False,
+        block_forbidden_actions=True,
+    )
+
+
+def cancel_action(path: str | Path, action_id: str, reason: str | None = None) -> dict[str, Any]:
+    original = find_action(path, action_id)
+    if not original:
+        raise ValueError(f"action not found: {action_id}")
+
+    params = dict(original.get("params") or {})
+    params["cancelled_action_id"] = action_id
+    record = {
+        "time": now_iso(),
+        "action_id": make_id("act"),
+        "task_id": original.get("task_id", "default"),
+        "action": original.get("action"),
+        "target": original.get("target"),
+        "reason": reason or f"Cancelled action {action_id}: {original.get('reason', '')}",
+        "permission_level": original.get("permission_level", PermissionLevel.SAFE.value),
+        "status": ActionStatus.BLOCKED.value,
+        "params": params,
+    }
+    return write_action(path, action_from_dict(record))

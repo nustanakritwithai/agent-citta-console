@@ -4,6 +4,7 @@
 User Goal
   -> Agent Runtime
   -> Body Agents / Sub-agents
+  -> citta_config.json
   -> trace.jsonl / logs / diffs / state
   -> Citta Observer
   -> State Analyzer
@@ -25,3 +26,11 @@ The v0.1 implementation keeps the core framework-agnostic:
 - `renderer.py` creates the HTML dashboard.
 - `dispatcher.py` appends selected actions to JSONL.
 - `server.py` exposes the same flow through a local standard-library web server.
+
+The v0.2 live console adds:
+
+- `config.py` for trace, action, dashboard, refresh, and confirmation settings.
+- auto-refresh HTML using a plain `<meta http-equiv="refresh">` tag.
+- task detail routing through `GET /task/{task_id}`.
+- confirmation routing for pending medium/dangerous actions.
+- action history rendering from `actions.jsonl`.
