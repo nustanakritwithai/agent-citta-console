@@ -338,6 +338,18 @@ runtime proof-of-concept, OpenClaw as a contract-compliant stub, and local
 transcript mock adapters for Codex and Claude Code. These adapters do not call
 external APIs or execute runtime actions.
 
+## Experimental Hermes Citta Skill
+
+The experimental Hermes Citta Skill is a local proof-of-concept that records
+Hermes-style activity as Citta-compatible trace events and generates a Citta
+Console dashboard.
+
+- Docs: [docs/hermes_citta_skill.md](docs/hermes_citta_skill.md)
+- Skill folder: [skills/hermes_citta_skill/](skills/hermes_citta_skill/)
+
+It does not execute recommended actions, modify Hermes runtime, call external
+APIs, or claim real consciousness.
+
 ## Local MCP-style tools
 
 v0.4 exposes Citta operations through a local tool dispatcher and CLI.

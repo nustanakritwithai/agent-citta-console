@@ -1,0 +1,20 @@
+{
+  "name": "hermes-citta-skill",
+  "version": "0.1.0",
+  "description": "Experimental Hermes skill that writes Citta-compatible traces and generates Citta Console dashboards.",
+  "status": "experimental",
+  "runtime": "local",
+  "safety": {
+    "external_api_calls": false,
+    "shell_execution": false,
+    "deploy": false,
+    "git_push": false,
+    "delete_execution": false,
+    "destructive_actions": false
+  },
+  "outputs": [
+    "citta_trace.jsonl",
+    "actions.jsonl",
+    "dashboard.html"
+  ]
+}
