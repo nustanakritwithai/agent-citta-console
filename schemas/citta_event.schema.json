@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/agent-citta-console/citta_event.schema.json",
+  "title": "Citta Event",
+  "type": "object",
+  "required": ["time", "task_id", "agent", "framework", "action", "status"],
+  "properties": {
+    "time": { "type": "string", "format": "date-time" },
+    "event_id": { "type": "string" },
+    "task_id": { "type": "string" },
+    "agent": { "type": "string" },
+    "framework": { "type": "string" },
+    "action": { "type": "string" },
+    "target": { "type": ["string", "null"] },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "running", "completed", "failed", "blocked", "cancelled"]
+    },
+    "input": {},
+    "output": {},
+    "error": {},
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
