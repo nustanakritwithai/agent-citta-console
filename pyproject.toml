@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agent-citta-console"
-version = "0.4.0"
+version = "0.5.0"
 description = "A universal HTML control panel for agent awareness and action chaining."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -24,6 +24,12 @@ classifiers = [
   "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/nustanakritwithai/agent-citta-console"
+Repository = "https://github.com/nustanakritwithai/agent-citta-console"
+Issues = "https://github.com/nustanakritwithai/agent-citta-console/issues"
+Changelog = "https://github.com/nustanakritwithai/agent-citta-console/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = ["pytest"]

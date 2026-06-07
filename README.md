@@ -1,8 +1,13 @@
 # agent-citta-console
 
+[![CI](https://github.com/nustanakritwithai/agent-citta-console/actions/workflows/ci.yml/badge.svg)](https://github.com/nustanakritwithai/agent-citta-console/actions/workflows/ci.yml)
+
 A universal HTML control panel for agent awareness and action chaining.
 
 Body agents act. Citta observes traces. The console decides what happens next.
+
+Project status: early local-first releases. The core JSONL protocol, HTML
+console, adapter foundation, and local MCP-style tool dispatcher are available.
 
 ## What is it?
 
@@ -85,6 +90,20 @@ examples/generic_jsonl/dashboard.html
 The demo reads `examples/generic_jsonl/citta_config.json` for trace, action,
 dashboard, and auto-refresh settings.
 
+## Install from GitHub
+
+```bash
+python -m pip install "agent-citta-console @ git+https://github.com/nustanakritwithai/agent-citta-console.git"
+```
+
+For development:
+
+```bash
+git clone https://github.com/nustanakritwithai/agent-citta-console
+cd agent-citta-console
+python -m pip install -e ".[dev]"
+```
+
 Run tests:
 
 ```bash
@@ -106,6 +125,26 @@ Live console routes:
 - `GET /actions` for JSON action history
 - `POST /action` to record a selected action
 - `GET /confirm?action_id=...`, `POST /confirm`, and `POST /cancel` for confirmation flow
+
+## CLI quickstart
+
+```bash
+citta-console tool citta.list_adapters
+citta-console tool citta.describe_adapter --json '{"adapter":"generic"}'
+citta-console tool citta.read_events --json '{"trace_path":"examples/generic_jsonl/trace.jsonl","limit":5}'
+```
+
+Tool calls return JSON and run local Citta functions only.
+
+## Demo screenshots
+
+To capture a screenshot:
+
+1. Run `python examples/generic_jsonl/run_demo.py`.
+2. Open `examples/generic_jsonl/dashboard.html` in a browser.
+3. Capture the browser window with your OS screenshot tool.
+
+Screenshots are documentation artifacts and are not required for tests.
 
 ## Termux quickstart
 
@@ -278,6 +317,18 @@ Built-in tools include:
 
 The tool dispatcher calls local Citta functions only. It does not call external
 APIs or execute shell, deploy, git push, or delete operations.
+
+## Release history
+
+See [CHANGELOG.md](CHANGELOG.md).
+
+## What this is not
+
+- Not a claim of real consciousness.
+- Not a remote MCP server with full protocol compliance.
+- Not a deployment, git, shell, or file deletion executor.
+- Not a deep integration with Hermes, OpenClaw, Codex, or Claude Code yet.
+- Not a replacement for runtime-specific safety review.
 
 ## Roadmap
 
