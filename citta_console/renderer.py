@@ -84,6 +84,53 @@ def render_risk_panel(risks: list[dict[str, Any]]) -> str:
     return '<ul class="risks">' + "\n".join(items) + "</ul>"
 
 
+def render_reflection_panel(reflection: dict[str, Any] | None) -> str:
+    if not reflection:
+        return '<p class="empty">No reflection recorded for this observation.</p>'
+    fields = [
+        ("Goal", reflection.get("goal")),
+        ("Action", reflection.get("action")),
+        ("Result", reflection.get("result")),
+        ("Risk / Mistake", reflection.get("risk_or_mistake")),
+        ("Lesson", reflection.get("lesson")),
+        ("Next Recommendation", reflection.get("next_recommendation")),
+    ]
+    rows = []
+    for label, value in fields:
+        rows.append(
+            "<tr>"
+            f"<th>{escape(label)}</th>"
+            f"<td>{_value(value)}</td>"
+            "</tr>"
+        )
+    return (
+        '<table class="reflection-table"><tbody>'
+        + "\n".join(rows)
+        + "</tbody></table>"
+    )
+
+
+def render_reflection_history(reflections: list[dict[str, Any]]) -> str:
+    if not reflections:
+        return '<p class="empty">No reflection history yet.</p>'
+    rows = []
+    for reflection in reflections[-10:]:
+        rows.append(
+            "<tr>"
+            f"<td>{_value(reflection.get('time'))}</td>"
+            f"<td>{_value(reflection.get('action'))}</td>"
+            f"<td>{_value(reflection.get('lesson'))}</td>"
+            f"<td>{_value(reflection.get('next_recommendation'))}</td>"
+            "</tr>"
+        )
+    return (
+        "<table><thead><tr><th>Time</th><th>Action</th><th>Lesson</th>"
+        "<th>Next Recommendation</th></tr></thead><tbody>"
+        + "\n".join(rows)
+        + "</tbody></table>"
+    )
+
+
 def render_recent_trace(events: list[dict[str, Any]]) -> str:
     if not events:
         return '<p class="empty">No recent trace events.</p>'
@@ -151,6 +198,7 @@ def _style() -> str:
     table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
     th, td { border-bottom: 1px solid #2d3748; padding: 0.55rem; text-align: left; vertical-align: top; }
     th { color: #bee3f8; }
+    .reflection-table th { width: 12rem; vertical-align: top; }
     .badge { display: inline-block; padding: 0.2rem 0.55rem; border-radius: 999px; background: #2d3748; margin: 0.1rem; }
     .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
     .action-form { display: inline-flex; align-items: center; gap: 0.5rem; }
@@ -185,6 +233,8 @@ def render_dashboard_html(
     risks = [to_dict(risk) for risk in report.get("risks", [])]
     actions = [to_dict(action) for action in report.get("recommended_actions", [])]
     action_history = [to_dict(action) for action in report.get("action_history", [])]
+    reflection = report.get("reflection")
+    reflection_history = [to_dict(item) for item in report.get("reflection_history", [])]
     agents = report.get("active_agents", [])
     goal = report.get("goal") or "No goal supplied"
     task_id = str(report.get("task_id", "default"))
@@ -227,6 +277,17 @@ def render_dashboard_html(
       <h2>Recommended Actions</h2>
       <p class="empty">Medium and dangerous actions create a pending confirmation record before they can be confirmed.</p>
       <div class="actions">{render_action_buttons(actions, task_id=task_id)}</div>
+    </section>
+
+    <section>
+      <h2>Self-Reflection</h2>
+      <p class="empty">Contextual post-action reflection recorded as JSONL evidence. Not a claim of consciousness.</p>
+      {render_reflection_panel(reflection if isinstance(reflection, dict) else None)}
+    </section>
+
+    <section>
+      <h2>Reflection History</h2>
+      {render_reflection_history(reflection_history)}
     </section>
 
     <section>
