@@ -18,6 +18,7 @@ def test_list_tool_definitions_contains_required_tools() -> None:
         "citta.observe_with_adapter",
         "citta.summarize_reflections",
         "citta.run_reflective_loop",
+        "citta.run_reflective_daemon",
     }.issubset(names)
 
 

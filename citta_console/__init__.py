@@ -14,7 +14,8 @@ from .dispatcher import dispatch_action
 from .memory import bootstrap_task_memory, summarize_reflection_history
 from .observer import observe, observe_with_adapter
 from .recommender import recommend_actions
-from .reflective_loop import default_reflections_path, run_reflective_loop
+from .reflective_daemon import run_reflective_daemon
+from .reflective_loop import default_reflections_path, run_reflective_loop, run_reflective_tick
 from .reflection import build_reflection, read_reflections, record_reflection_from_observation
 from .reflection_analyzer import analyze_reflection_history, detect_reflection_risks
 from .renderer import render_dashboard
@@ -48,7 +49,9 @@ __all__ = [
     "recommend_actions",
     "record_reflection_from_observation",
     "render_dashboard",
+    "run_reflective_daemon",
     "run_reflective_loop",
+    "run_reflective_tick",
     "summarize_reflection_history",
 ]
 

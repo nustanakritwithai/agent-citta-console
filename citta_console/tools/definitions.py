@@ -112,6 +112,14 @@ TOOLS: dict[str, ToolDefinition] = {
         safety_level="safe",
         handler=handlers.handle_run_reflective_loop,
     ),
+    "citta.run_reflective_daemon": ToolDefinition(
+        name="citta.run_reflective_daemon",
+        description="Poll trace changes and run reflective ticks until max_cycles or stop.",
+        input_schema=schemas.RUN_REFLECTIVE_DAEMON_INPUT_SCHEMA,
+        output_schema=schemas.RUN_REFLECTIVE_DAEMON_OUTPUT_SCHEMA,
+        safety_level="safe",
+        handler=handlers.handle_run_reflective_daemon,
+    ),
 }
 
 

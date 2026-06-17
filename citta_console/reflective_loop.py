@@ -38,6 +38,82 @@ def _load_task_events(trace_path: str | Path, task_id: str) -> list[dict[str, An
     return events_to_dicts(filter_events_by_task(events, task_id))
 
 
+def run_reflective_tick(
+    trace_path: str | Path,
+    *,
+    task_id: str,
+    goal: str | None = None,
+    actions_path: str | Path | None = None,
+    reflections_path: str | Path | None = None,
+    record_reflection: bool = True,
+    fallback_action: str = "edit_file",
+) -> dict[str, Any]:
+    """Run one observe cycle and optionally let the reflective body act once."""
+
+    trace_file = Path(trace_path)
+    reflections_file = (
+        Path(reflections_path)
+        if reflections_path is not None
+        else default_reflections_path(trace_file)
+    )
+
+    event_dicts = _load_task_events(trace_file, task_id)
+    report = observe(
+        trace_file,
+        task_id=task_id,
+        goal=goal,
+        actions_path=actions_path,
+        reflections_path=reflections_file,
+        record_reflection=record_reflection,
+    )
+
+    reflection = report.get("reflection") or {}
+    reflection_id = reflection.get("reflection_id")
+    tick: dict[str, Any] = {
+        "action": "observed",
+        "report": report,
+        "reflection_id": reflection_id,
+        "body_event": None,
+        "body_action": None,
+        "lesson_applied": None,
+        "stop_hint": None,
+    }
+
+    if report.get("body_loop_status", {}).get("lesson_applied") is True:
+        tick["action"] = "already_applied"
+        return tick
+
+    if reflection_id and reflection_id in _applied_reflection_ids(event_dicts):
+        tick["action"] = "reflection_already_applied"
+        return tick
+
+    body_event = append_reflective_trace_event(
+        trace_file,
+        reflections_file,
+        task_id=task_id,
+        fallback=fallback_action,
+    )
+    body_metadata = body_event.get("metadata") or {}
+    lesson_applied = body_metadata.get("lesson_applied")
+    body_action = body_event.get("action")
+
+    tick.update(
+        {
+            "action": "acted",
+            "body_event": body_event,
+            "body_action": body_action,
+            "lesson_applied": lesson_applied,
+        }
+    )
+
+    if body_action in BLOCKING_BODY_ACTIONS or body_event.get("status") == "blocked":
+        tick["stop_hint"] = "body_blocked"
+    elif lesson_applied is True:
+        tick["stop_hint"] = "lesson_applied"
+
+    return tick
+
+
 def run_reflective_loop(
     trace_path: str | Path,
     *,
@@ -67,73 +143,39 @@ def run_reflective_loop(
     stop_reason = "max_iterations"
 
     for iteration in range(1, max_iterations + 1):
-        report = observe(
+        tick = run_reflective_tick(
             trace_file,
             task_id=task_id,
             goal=goal,
             actions_path=actions_path,
             reflections_path=reflections_file,
             record_reflection=record_reflection,
+            fallback_action=fallback_action,
         )
 
-        reflection = report.get("reflection") or {}
-        reflection_id = reflection.get("reflection_id")
-        event_dicts = _load_task_events(trace_file, task_id)
+        report = tick["report"]
+        step = {
+            "iteration": iteration,
+            "phase": "act" if tick["action"] == "acted" else "observe",
+            "decision": report.get("decision"),
+            "body_action": tick.get("body_action"),
+            "lesson_applied": tick.get("lesson_applied"),
+            "reflection_id": tick.get("reflection_id"),
+            "body_status": (tick.get("body_event") or {}).get("status"),
+            "tick_action": tick["action"],
+        }
+        steps.append(step)
 
-        if report.get("body_loop_status", {}).get("lesson_applied") is True:
+        if tick["action"] == "already_applied":
             stop_reason = "lesson_applied"
-            steps.append(
-                {
-                    "iteration": iteration,
-                    "phase": "observe",
-                    "decision": report.get("decision"),
-                    "body_action": None,
-                    "lesson_applied": True,
-                    "reflection_id": reflection_id,
-                }
-            )
             break
-
-        if reflection_id and reflection_id in _applied_reflection_ids(event_dicts):
+        if tick["action"] == "reflection_already_applied":
             stop_reason = "reflection_already_applied"
-            steps.append(
-                {
-                    "iteration": iteration,
-                    "phase": "observe",
-                    "decision": report.get("decision"),
-                    "body_action": None,
-                    "lesson_applied": None,
-                    "reflection_id": reflection_id,
-                }
-            )
             break
-
-        body_event = append_reflective_trace_event(
-            trace_file,
-            reflections_file,
-            task_id=task_id,
-            fallback=fallback_action,
-        )
-        body_metadata = body_event.get("metadata") or {}
-        lesson_applied = body_metadata.get("lesson_applied")
-        body_action = body_event.get("action")
-
-        steps.append(
-            {
-                "iteration": iteration,
-                "phase": "act",
-                "decision": report.get("decision"),
-                "body_action": body_action,
-                "lesson_applied": lesson_applied,
-                "reflection_id": reflection_id,
-                "body_status": body_event.get("status"),
-            }
-        )
-
-        if body_action in BLOCKING_BODY_ACTIONS or body_event.get("status") == "blocked":
+        if tick.get("stop_hint") == "body_blocked":
             stop_reason = "body_blocked"
             break
-        if lesson_applied is True:
+        if tick.get("stop_hint") == "lesson_applied":
             stop_reason = "lesson_applied"
             break
 

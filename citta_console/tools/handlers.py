@@ -10,6 +10,7 @@ from ..config import CittaConfig, load_config
 from ..dispatcher import dispatch_action, read_actions
 from ..memory import summarize_reflection_history
 from ..observer import observe, observe_with_adapter
+from ..reflective_daemon import run_reflective_daemon
 from ..reflective_loop import run_reflective_loop
 from ..renderer import render_dashboard
 from ..trace_reader import events_to_dicts, read_trace
@@ -132,6 +133,32 @@ def handle_run_reflective_loop(payload: dict[str, Any]) -> dict[str, Any]:
         refresh_interval_seconds=int(payload.get("refresh_interval_seconds", 0)),
     )
     return result
+
+
+def handle_run_reflective_daemon(payload: dict[str, Any]) -> dict[str, Any]:
+    poll_interval_seconds = float(payload.get("poll_interval_seconds", 2.0))
+    if poll_interval_seconds < 0:
+        raise ValueError("poll_interval_seconds must be >= 0")
+
+    max_cycles = payload.get("max_cycles")
+    if max_cycles is not None and (
+        not isinstance(max_cycles, int) or isinstance(max_cycles, bool) or max_cycles < 1
+    ):
+        raise ValueError("max_cycles must be an integer >= 1 when provided")
+
+    return run_reflective_daemon(
+        _required_str(payload, "trace_path"),
+        task_id=_required_str(payload, "task_id"),
+        goal=payload.get("goal"),
+        actions_path=payload.get("actions_path"),
+        reflections_path=payload.get("reflections_path"),
+        dashboard_path=payload.get("dashboard_path"),
+        poll_interval_seconds=poll_interval_seconds,
+        record_reflection=bool(payload.get("record_reflection", True)),
+        fallback_action=str(payload.get("fallback_action", "edit_file")),
+        refresh_interval_seconds=int(payload.get("refresh_interval_seconds", 0)),
+        max_cycles=max_cycles,
+    )
 
 
 def _required_str(payload: dict[str, Any], key: str) -> str:

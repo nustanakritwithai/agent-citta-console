@@ -169,3 +169,34 @@ RUN_REFLECTIVE_LOOP_OUTPUT_SCHEMA = object_schema(
     },
     required=["ok", "task_id", "iterations", "stop_reason", "steps", "final_report"],
 )
+
+RUN_REFLECTIVE_DAEMON_INPUT_SCHEMA = object_schema(
+    {
+        **PATH_PROPS,
+        "reflections_path": {"type": ["string", "null"]},
+        "poll_interval_seconds": {"type": "number"},
+        "max_cycles": {"type": ["integer", "null"]},
+        "record_reflection": {"type": "boolean"},
+        "fallback_action": {"type": "string"},
+        "refresh_interval_seconds": {"type": "integer"},
+    },
+    required=["trace_path", "task_id"],
+)
+RUN_REFLECTIVE_DAEMON_OUTPUT_SCHEMA = object_schema(
+    {
+        **OK_SCHEMA,
+        "task_id": {"type": "string"},
+        "stop_reason": {"type": "string"},
+        "cycles": {"type": "integer"},
+        "ticks_run": {"type": "integer"},
+        "idle_polls": {"type": "integer"},
+        "blocked": {"type": "boolean"},
+        "history": {"type": "array"},
+        "final_report": {"type": "object"},
+        "trace_path": {"type": "string"},
+        "reflections_path": {"type": "string"},
+        "dashboard_path": {"type": ["string", "null"]},
+        "poll_interval_seconds": {"type": "number"},
+    },
+    required=["ok", "task_id", "stop_reason", "cycles", "ticks_run", "history", "final_report"],
+)
