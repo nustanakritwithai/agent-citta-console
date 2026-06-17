@@ -8,6 +8,12 @@ import signal
 import sys
 from typing import Any
 
+from .agent_runtime import (
+    DEFAULT_TASK_ID,
+    get_runtime_status,
+    record_agent_event,
+    record_user_request,
+)
 from .config import load_config
 from .reflective_daemon import run_reflective_daemon
 from .reflective_loop import default_reflections_path, run_reflective_loop
@@ -91,6 +97,47 @@ def main(argv: list[str] | None = None) -> int:
     )
     add_observe_arguments(hermes_observe)
 
+    runtime_parser = subparsers.add_parser(
+        "runtime",
+        help="Operate the always-on agent Citta runtime",
+    )
+    runtime_subparsers = runtime_parser.add_subparsers(dest="runtime_command", required=True)
+    runtime_status = runtime_subparsers.add_parser(
+        "status",
+        help="Observe the agent runtime and render its dashboard",
+    )
+    runtime_status.add_argument("--task-id", default=DEFAULT_TASK_ID)
+    runtime_status.add_argument("--config", help="Optional runtime config JSON path")
+    runtime_status.add_argument(
+        "--record-reflection",
+        action="store_true",
+        help="Append a reflection record while observing",
+    )
+    runtime_record = runtime_subparsers.add_parser(
+        "record",
+        help="Append one agent event to the runtime trace",
+    )
+    runtime_record.add_argument("--action", required=True)
+    runtime_record.add_argument("--target")
+    runtime_record.add_argument("--status", default="completed")
+    runtime_record.add_argument("--input")
+    runtime_record.add_argument("--output")
+    runtime_record.add_argument("--error")
+    runtime_record.add_argument("--task-id", default=DEFAULT_TASK_ID)
+    runtime_record.add_argument("--config", help="Optional runtime config JSON path")
+    runtime_record.add_argument(
+        "--metadata",
+        default="{}",
+        help="Optional JSON metadata object",
+    )
+    runtime_user = runtime_subparsers.add_parser(
+        "user",
+        help="Record a user request in the runtime trace",
+    )
+    runtime_user.add_argument("content")
+    runtime_user.add_argument("--task-id", default=DEFAULT_TASK_ID)
+    runtime_user.add_argument("--config", help="Optional runtime config JSON path")
+
     args = parser.parse_args(argv)
     if args.command == "tool":
         return _run_tool(args.tool_name, args.json)
@@ -100,6 +147,12 @@ def main(argv: list[str] | None = None) -> int:
         return _run_daemon(args)
     if args.command == "hermes" and args.hermes_command == "observe":
         return _run_hermes_observe(args)
+    if args.command == "runtime" and args.runtime_command == "status":
+        return _run_runtime_status(args)
+    if args.command == "runtime" and args.runtime_command == "record":
+        return _run_runtime_record(args)
+    if args.command == "runtime" and args.runtime_command == "user":
+        return _run_runtime_user(args)
     parser.error(f"unknown command: {args.command}")
     return 2
 
@@ -209,6 +262,51 @@ def _run_daemon(args: argparse.Namespace) -> int:
 
 def _print_json(value: dict[str, Any]) -> None:
     print(json.dumps(value, ensure_ascii=False, sort_keys=True))
+
+
+def _run_runtime_status(args: argparse.Namespace) -> int:
+    result = get_runtime_status(
+        task_id=args.task_id,
+        config_path=args.config,
+        record_reflection=args.record_reflection,
+    )
+    _print_json(result)
+    return 0
+
+
+def _run_runtime_record(args: argparse.Namespace) -> int:
+    try:
+        metadata = json.loads(args.metadata)
+    except json.JSONDecodeError as exc:
+        _print_json({"ok": False, "error": f"invalid metadata JSON: {exc}"})
+        return 2
+    if not isinstance(metadata, dict):
+        _print_json({"ok": False, "error": "metadata must be a JSON object"})
+        return 2
+
+    event = record_agent_event(
+        action=args.action,
+        target=args.target,
+        status=args.status,
+        input=args.input,
+        output=args.output,
+        error=args.error,
+        metadata=metadata,
+        task_id=args.task_id,
+        config_path=args.config,
+    )
+    _print_json({"ok": True, "event": event})
+    return 0
+
+
+def _run_runtime_user(args: argparse.Namespace) -> int:
+    event = record_user_request(
+        args.content,
+        task_id=args.task_id,
+        config_path=args.config,
+    )
+    _print_json({"ok": True, "event": event})
+    return 0
 
 
 def _run_hermes_observe(args: argparse.Namespace) -> int:

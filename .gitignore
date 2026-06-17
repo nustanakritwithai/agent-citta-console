@@ -17,3 +17,7 @@ htmlcov/
 .DS_Store
 .idea/
 .vscode/
+runtime/citta/trace.jsonl
+runtime/citta/reflections.jsonl
+runtime/citta/actions.jsonl
+runtime/citta/dashboard.html
