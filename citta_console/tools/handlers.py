@@ -8,6 +8,7 @@ from typing import Any
 from ..adapters.registry import get_adapter, list_adapters
 from ..config import CittaConfig, load_config
 from ..dispatcher import dispatch_action, read_actions
+from ..memory import summarize_reflection_history
 from ..observer import observe, observe_with_adapter
 from ..renderer import render_dashboard
 from ..trace_reader import events_to_dicts, read_trace
@@ -93,6 +94,23 @@ def handle_observe_with_adapter(payload: dict[str, Any]) -> dict[str, Any]:
         "report": report,
         "dashboard_path": dashboard_path,
     }
+
+
+def handle_summarize_reflections(payload: dict[str, Any]) -> dict[str, Any]:
+    lesson_limit = payload.get("lesson_limit", 5)
+    mistake_limit = payload.get("mistake_limit", 5)
+    if not isinstance(lesson_limit, int) or isinstance(lesson_limit, bool) or lesson_limit < 0:
+        raise ValueError("lesson_limit must be a non-negative integer")
+    if not isinstance(mistake_limit, int) or isinstance(mistake_limit, bool) or mistake_limit < 0:
+        raise ValueError("mistake_limit must be a non-negative integer")
+
+    memory = summarize_reflection_history(
+        _required_str(payload, "reflections_path"),
+        task_id=payload.get("task_id"),
+        lesson_limit=lesson_limit,
+        mistake_limit=mistake_limit,
+    )
+    return {"ok": True, "memory": memory}
 
 
 def _required_str(payload: dict[str, Any], key: str) -> str:

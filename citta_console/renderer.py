@@ -148,6 +148,62 @@ def render_reflection_insights(insights: dict[str, Any]) -> str:
     )
 
 
+def render_prior_lessons_panel(
+    prior_lessons: list[dict[str, Any]],
+    *,
+    cross_task_lessons: list[dict[str, Any]] | None = None,
+    memory_summary: str = "",
+) -> str:
+    if memory_summary:
+        summary = f"<p>{_value(memory_summary)}</p>"
+    else:
+        summary = ""
+
+    if not prior_lessons and not cross_task_lessons:
+        return summary + '<p class="empty">No prior lessons to remember yet.</p>'
+
+    rows = []
+    for item in prior_lessons[:10]:
+        rows.append(
+            "<tr>"
+            f"<td>{_value(item.get('lesson'))}</td>"
+            f"<td>{_value(item.get('count'))}</td>"
+            f"<td>{_value(item.get('last_seen'))}</td>"
+            "</tr>"
+        )
+    task_rows = []
+    for item in (cross_task_lessons or [])[:10]:
+        task_rows.append(
+            "<tr>"
+            f"<td>{_value(item.get('lesson'))}</td>"
+            f"<td>{_value(', '.join(item.get('task_ids', [])))}</td>"
+            f"<td>{_value(item.get('count'))}</td>"
+            "</tr>"
+        )
+
+    current_table = ""
+    if rows:
+        current_table = (
+            "<h3>Prior Lessons</h3>"
+            "<table><thead><tr><th>Lesson</th><th>Count</th><th>Last Seen</th>"
+            "</tr></thead><tbody>"
+            + "\n".join(rows)
+            + "</tbody></table>"
+        )
+
+    cross_table = ""
+    if task_rows:
+        cross_table = (
+            "<h3>Cross-Task Lessons</h3>"
+            "<table><thead><tr><th>Lesson</th><th>From Tasks</th><th>Count</th>"
+            "</tr></thead><tbody>"
+            + "\n".join(task_rows)
+            + "</tbody></table>"
+        )
+
+    return summary + current_table + cross_table
+
+
 def render_body_loop_status(status: dict[str, Any]) -> str:
     loop_status = str(status.get("body_loop_status") or "no_reflective_body_event")
     lesson_applied = status.get("lesson_applied")
@@ -308,6 +364,9 @@ def render_dashboard_html(
     reflection_history = [to_dict(item) for item in report.get("reflection_history", [])]
     reflection_insights = report.get("reflection_insights") or {}
     body_loop_status = report.get("body_loop_status") or {}
+    prior_lessons = [to_dict(item) for item in report.get("prior_lessons", [])]
+    cross_task_lessons = [to_dict(item) for item in report.get("cross_task_lessons", [])]
+    memory_summary = str(report.get("memory_summary") or "")
     agents = report.get("active_agents", [])
     goal = report.get("goal") or "No goal supplied"
     task_id = str(report.get("task_id", "default"))
@@ -356,6 +415,12 @@ def render_dashboard_html(
       <h2>Self-Reflection</h2>
       <p class="empty">Contextual post-action reflection recorded as JSONL evidence. Not a claim of consciousness.</p>
       {render_reflection_panel(reflection if isinstance(reflection, dict) else None)}
+    </section>
+
+    <section>
+      <h2>Lessons To Remember</h2>
+      <p class="empty">Cross-session memory from reflection JSONL. External evidence only.</p>
+      {render_prior_lessons_panel(prior_lessons, cross_task_lessons=cross_task_lessons, memory_summary=memory_summary)}
     </section>
 
     <section>

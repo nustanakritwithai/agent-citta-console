@@ -8,6 +8,7 @@ from typing import Any
 from .analyzer import analyze_current_state
 from .body_policy import extract_body_loop_status
 from .dispatcher import read_actions
+from .memory import summarize_reflection_history
 from .recommender import recommend_actions
 from .reflection import build_reflection, read_reflections, write_reflection
 from .reflection_analyzer import analyze_reflection_history, detect_reflection_risks
@@ -69,6 +70,17 @@ def _build_observation(
 
     body_loop_status = extract_body_loop_status(event_dicts)
 
+    memory: dict[str, Any] = {
+        "prior_lessons": [],
+        "cross_task_lessons": [],
+        "memory_summary": "No prior lessons recorded in reflection history.",
+    }
+    if reflections_path is not None:
+        memory = summarize_reflection_history(
+            reflections_path,
+            task_id=active_task_id,
+        )
+
     return CittaReport(
         time=now_iso(),
         task_id=active_task_id,
@@ -87,6 +99,9 @@ def _build_observation(
         reflection_history=reflection_history,
         reflection_insights=reflection_insights,
         body_loop_status=body_loop_status,
+        prior_lessons=memory["prior_lessons"],
+        cross_task_lessons=memory["cross_task_lessons"],
+        memory_summary=memory["memory_summary"],
     ).to_dict()
 
 

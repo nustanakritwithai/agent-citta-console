@@ -126,3 +126,20 @@ OBSERVE_WITH_ADAPTER_OUTPUT_SCHEMA = object_schema(
     },
     required=["ok", "adapter", "report", "dashboard_path"],
 )
+
+SUMMARIZE_REFLECTIONS_INPUT_SCHEMA = object_schema(
+    {
+        "reflections_path": {"type": "string"},
+        "task_id": {"type": ["string", "null"]},
+        "lesson_limit": {"type": "integer"},
+        "mistake_limit": {"type": "integer"},
+    },
+    required=["reflections_path"],
+)
+SUMMARIZE_REFLECTIONS_OUTPUT_SCHEMA = object_schema(
+    {
+        **OK_SCHEMA,
+        "memory": {"type": "object"},
+    },
+    required=["ok", "memory"],
+)

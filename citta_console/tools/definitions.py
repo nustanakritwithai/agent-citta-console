@@ -96,6 +96,14 @@ TOOLS: dict[str, ToolDefinition] = {
         safety_level="safe",
         handler=handlers.handle_observe_with_adapter,
     ),
+    "citta.summarize_reflections": ToolDefinition(
+        name="citta.summarize_reflections",
+        description="Summarize prior lessons and mistakes from reflection JSONL history.",
+        input_schema=schemas.SUMMARIZE_REFLECTIONS_INPUT_SCHEMA,
+        output_schema=schemas.SUMMARIZE_REFLECTIONS_OUTPUT_SCHEMA,
+        safety_level="safe",
+        handler=handlers.handle_summarize_reflections,
+    ),
 }
 
 

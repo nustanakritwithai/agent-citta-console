@@ -170,6 +170,9 @@ class CittaReport:
     reflection_history: list[dict[str, Any]] = field(default_factory=list)
     reflection_insights: dict[str, Any] = field(default_factory=dict)
     body_loop_status: dict[str, Any] = field(default_factory=dict)
+    prior_lessons: list[dict[str, Any]] = field(default_factory=list)
+    cross_task_lessons: list[dict[str, Any]] = field(default_factory=list)
+    memory_summary: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)

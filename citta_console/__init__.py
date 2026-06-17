@@ -11,6 +11,7 @@ from .body_policy import (
 )
 from .config import default_config, load_config
 from .dispatcher import dispatch_action
+from .memory import bootstrap_task_memory, summarize_reflection_history
 from .observer import observe, observe_with_adapter
 from .recommender import recommend_actions
 from .reflection import build_reflection, read_reflections, record_reflection_from_observation
@@ -24,6 +25,7 @@ __all__ = [
     "analyze_current_state",
     "analyze_reflection_history",
     "append_reflective_trace_event",
+    "bootstrap_task_memory",
     "build_reflection",
     "choose_action_from_reflection",
     "detect_risks",
@@ -45,6 +47,7 @@ __all__ = [
     "recommend_actions",
     "record_reflection_from_observation",
     "render_dashboard",
+    "summarize_reflection_history",
 ]
 
 __version__ = "0.9.0"
