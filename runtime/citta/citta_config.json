@@ -1,0 +1,10 @@
+{
+  "trace_path": "runtime/citta/trace.jsonl",
+  "actions_path": "runtime/citta/actions.jsonl",
+  "dashboard_path": "runtime/citta/dashboard.html",
+  "refresh_interval_seconds": 5,
+  "require_confirmation_for_medium": true,
+  "require_confirmation_for_dangerous": true,
+  "block_forbidden_actions": true,
+  "goal": "Operate as the primary witness layer for the Cursor cloud agent"
+}
