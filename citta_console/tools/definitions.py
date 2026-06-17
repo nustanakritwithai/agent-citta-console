@@ -96,6 +96,30 @@ TOOLS: dict[str, ToolDefinition] = {
         safety_level="safe",
         handler=handlers.handle_observe_with_adapter,
     ),
+    "citta.summarize_reflections": ToolDefinition(
+        name="citta.summarize_reflections",
+        description="Summarize prior lessons and mistakes from reflection JSONL history.",
+        input_schema=schemas.SUMMARIZE_REFLECTIONS_INPUT_SCHEMA,
+        output_schema=schemas.SUMMARIZE_REFLECTIONS_OUTPUT_SCHEMA,
+        safety_level="safe",
+        handler=handlers.handle_summarize_reflections,
+    ),
+    "citta.run_reflective_loop": ToolDefinition(
+        name="citta.run_reflective_loop",
+        description="Run the automatic observe-reflect-act loop for a reflective body agent.",
+        input_schema=schemas.RUN_REFLECTIVE_LOOP_INPUT_SCHEMA,
+        output_schema=schemas.RUN_REFLECTIVE_LOOP_OUTPUT_SCHEMA,
+        safety_level="safe",
+        handler=handlers.handle_run_reflective_loop,
+    ),
+    "citta.run_reflective_daemon": ToolDefinition(
+        name="citta.run_reflective_daemon",
+        description="Poll trace changes and run reflective ticks until max_cycles or stop.",
+        input_schema=schemas.RUN_REFLECTIVE_DAEMON_INPUT_SCHEMA,
+        output_schema=schemas.RUN_REFLECTIVE_DAEMON_OUTPUT_SCHEMA,
+        safety_level="safe",
+        handler=handlers.handle_run_reflective_daemon,
+    ),
 }
 
 

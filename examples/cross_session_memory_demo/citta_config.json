@@ -1,0 +1,10 @@
+{
+  "trace_path": "examples/cross_session_memory_demo/trace.jsonl",
+  "actions_path": "examples/cross_session_memory_demo/actions.jsonl",
+  "dashboard_path": "examples/cross_session_memory_demo/dashboard.html",
+  "refresh_interval_seconds": 0,
+  "require_confirmation_for_medium": true,
+  "require_confirmation_for_dangerous": true,
+  "block_forbidden_actions": true,
+  "goal": "Start a new dashboard task safely"
+}

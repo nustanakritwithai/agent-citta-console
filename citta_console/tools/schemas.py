@@ -126,3 +126,77 @@ OBSERVE_WITH_ADAPTER_OUTPUT_SCHEMA = object_schema(
     },
     required=["ok", "adapter", "report", "dashboard_path"],
 )
+
+SUMMARIZE_REFLECTIONS_INPUT_SCHEMA = object_schema(
+    {
+        "reflections_path": {"type": "string"},
+        "task_id": {"type": ["string", "null"]},
+        "lesson_limit": {"type": "integer"},
+        "mistake_limit": {"type": "integer"},
+    },
+    required=["reflections_path"],
+)
+SUMMARIZE_REFLECTIONS_OUTPUT_SCHEMA = object_schema(
+    {
+        **OK_SCHEMA,
+        "memory": {"type": "object"},
+    },
+    required=["ok", "memory"],
+)
+
+RUN_REFLECTIVE_LOOP_INPUT_SCHEMA = object_schema(
+    {
+        **PATH_PROPS,
+        "reflections_path": {"type": ["string", "null"]},
+        "max_iterations": {"type": "integer"},
+        "record_reflection": {"type": "boolean"},
+        "fallback_action": {"type": "string"},
+        "refresh_interval_seconds": {"type": "integer"},
+    },
+    required=["trace_path", "task_id"],
+)
+RUN_REFLECTIVE_LOOP_OUTPUT_SCHEMA = object_schema(
+    {
+        **OK_SCHEMA,
+        "task_id": {"type": "string"},
+        "iterations": {"type": "integer"},
+        "stop_reason": {"type": "string"},
+        "steps": {"type": "array"},
+        "final_report": {"type": "object"},
+        "trace_path": {"type": "string"},
+        "reflections_path": {"type": "string"},
+        "dashboard_path": {"type": ["string", "null"]},
+    },
+    required=["ok", "task_id", "iterations", "stop_reason", "steps", "final_report"],
+)
+
+RUN_REFLECTIVE_DAEMON_INPUT_SCHEMA = object_schema(
+    {
+        **PATH_PROPS,
+        "reflections_path": {"type": ["string", "null"]},
+        "poll_interval_seconds": {"type": "number"},
+        "max_cycles": {"type": ["integer", "null"]},
+        "record_reflection": {"type": "boolean"},
+        "fallback_action": {"type": "string"},
+        "refresh_interval_seconds": {"type": "integer"},
+    },
+    required=["trace_path", "task_id"],
+)
+RUN_REFLECTIVE_DAEMON_OUTPUT_SCHEMA = object_schema(
+    {
+        **OK_SCHEMA,
+        "task_id": {"type": "string"},
+        "stop_reason": {"type": "string"},
+        "cycles": {"type": "integer"},
+        "ticks_run": {"type": "integer"},
+        "idle_polls": {"type": "integer"},
+        "blocked": {"type": "boolean"},
+        "history": {"type": "array"},
+        "final_report": {"type": "object"},
+        "trace_path": {"type": "string"},
+        "reflections_path": {"type": "string"},
+        "dashboard_path": {"type": ["string", "null"]},
+        "poll_interval_seconds": {"type": "number"},
+    },
+    required=["ok", "task_id", "stop_reason", "cycles", "ticks_run", "history", "final_report"],
+)

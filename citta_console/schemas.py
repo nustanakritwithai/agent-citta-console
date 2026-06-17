@@ -44,6 +44,17 @@ class RiskSeverity(str, Enum):
 
 REQUIRED_EVENT_FIELDS = ("time", "task_id", "agent", "framework", "action", "status")
 REQUIRED_ACTION_FIELDS = ("time", "action_id", "task_id", "action", "reason")
+REQUIRED_REFLECTION_FIELDS = (
+    "time",
+    "reflection_id",
+    "task_id",
+    "goal",
+    "action",
+    "result",
+    "risk_or_mistake",
+    "lesson",
+    "next_recommendation",
+)
 
 
 def now_iso() -> str:
@@ -122,6 +133,25 @@ class RecommendedAction:
 
 
 @dataclass(slots=True)
+class CittaReflection:
+    time: str
+    reflection_id: str
+    task_id: str
+    goal: str
+    action: str
+    result: str
+    risk_or_mistake: str
+    lesson: str
+    next_recommendation: str
+    agent: str = "citta_observer"
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        data = asdict(self)
+        return {key: value for key, value in data.items() if value is not None}
+
+
+@dataclass(slots=True)
 class CittaReport:
     time: str
     task_id: str
@@ -136,6 +166,13 @@ class CittaReport:
     events: list[dict[str, Any]] = field(default_factory=list)
     action_history: list[dict[str, Any]] = field(default_factory=list)
     goal: str | None = None
+    reflection: dict[str, Any] | None = None
+    reflection_history: list[dict[str, Any]] = field(default_factory=list)
+    reflection_insights: dict[str, Any] = field(default_factory=dict)
+    body_loop_status: dict[str, Any] = field(default_factory=dict)
+    prior_lessons: list[dict[str, Any]] = field(default_factory=list)
+    cross_task_lessons: list[dict[str, Any]] = field(default_factory=list)
+    memory_summary: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
@@ -189,3 +226,22 @@ def action_from_dict(data: Mapping[str, Any]) -> CittaAction:
     validated = validate_action(data)
     allowed = CittaAction.__dataclass_fields__.keys()
     return CittaAction(**{key: value for key, value in validated.items() if key in allowed})
+
+
+def validate_reflection(data: Mapping[str, Any]) -> dict[str, Any]:
+    missing = [
+        field_name for field_name in REQUIRED_REFLECTION_FIELDS if not data.get(field_name)
+    ]
+    if missing:
+        raise ValueError(f"reflection missing required fields: {', '.join(missing)}")
+    normalized = dict(data)
+    normalized.setdefault("agent", "citta_observer")
+    metadata = normalized.get("metadata")
+    normalized["metadata"] = metadata if isinstance(metadata, dict) else {}
+    return normalized
+
+
+def reflection_from_dict(data: Mapping[str, Any]) -> CittaReflection:
+    validated = validate_reflection(data)
+    allowed = CittaReflection.__dataclass_fields__.keys()
+    return CittaReflection(**{key: value for key, value in validated.items() if key in allowed})

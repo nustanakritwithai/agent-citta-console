@@ -1,0 +1,10 @@
+{
+  "trace_path": "examples/self_reflection_demo/trace.jsonl",
+  "actions_path": "examples/self_reflection_demo/actions.jsonl",
+  "dashboard_path": "examples/self_reflection_demo/dashboard.html",
+  "refresh_interval_seconds": 0,
+  "require_confirmation_for_medium": true,
+  "require_confirmation_for_dangerous": true,
+  "block_forbidden_actions": true,
+  "goal": "Improve UI and keep tests passing"
+}

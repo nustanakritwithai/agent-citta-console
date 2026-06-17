@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/agent-citta-console/citta_reflection.schema.json",
+  "title": "Citta Reflection",
+  "type": "object",
+  "required": [
+    "time",
+    "reflection_id",
+    "task_id",
+    "goal",
+    "action",
+    "result",
+    "risk_or_mistake",
+    "lesson",
+    "next_recommendation"
+  ],
+  "properties": {
+    "time": { "type": "string", "format": "date-time" },
+    "reflection_id": { "type": "string" },
+    "task_id": { "type": "string" },
+    "agent": { "type": "string" },
+    "goal": { "type": "string" },
+    "action": { "type": "string" },
+    "result": { "type": "string" },
+    "risk_or_mistake": { "type": "string" },
+    "lesson": { "type": "string" },
+    "next_recommendation": { "type": "string" },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

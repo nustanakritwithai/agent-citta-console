@@ -4,9 +4,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import signal
 import sys
 from typing import Any
 
+from .config import load_config
+from .reflective_daemon import run_reflective_daemon
+from .reflective_loop import default_reflections_path, run_reflective_loop
 from .skills.hermes_citta_skill.run_observer import (
     add_observe_arguments,
     print_observer_result,
@@ -23,6 +27,62 @@ def main(argv: list[str] | None = None) -> int:
     tool_parser.add_argument("tool_name")
     tool_parser.add_argument("--json", default="{}", help="JSON object input")
 
+    loop_parser = subparsers.add_parser(
+        "loop",
+        help="Run automatic reflective body loops",
+    )
+    loop_subparsers = loop_parser.add_subparsers(dest="loop_command", required=True)
+    loop_run = loop_subparsers.add_parser(
+        "run",
+        help="Observe, reflect, and let the reflective body agent act in a loop",
+    )
+    loop_run.add_argument("--config", help="Optional Citta config JSON path")
+    loop_run.add_argument("--trace", help="Trace JSONL path")
+    loop_run.add_argument("--reflections", help="Reflections JSONL path")
+    loop_run.add_argument("--actions", help="Actions JSONL path")
+    loop_run.add_argument("--dashboard", help="Dashboard HTML output path")
+    loop_run.add_argument("--task-id", required=True, help="Task id to run")
+    loop_run.add_argument("--goal", help="Optional task goal")
+    loop_run.add_argument("--max-iterations", type=int, default=5)
+    loop_run.add_argument(
+        "--fallback-action",
+        default="edit_file",
+        help="Body action when no reflection exists yet",
+    )
+    loop_run.add_argument(
+        "--no-record-reflection",
+        action="store_true",
+        help="Observe without appending new reflection records",
+    )
+
+    loop_daemon = loop_subparsers.add_parser(
+        "daemon",
+        help="Continuously poll trace changes and run reflective ticks",
+    )
+    loop_daemon.add_argument("--config", help="Optional Citta config JSON path")
+    loop_daemon.add_argument("--trace", help="Trace JSONL path")
+    loop_daemon.add_argument("--reflections", help="Reflections JSONL path")
+    loop_daemon.add_argument("--actions", help="Actions JSONL path")
+    loop_daemon.add_argument("--dashboard", help="Dashboard HTML output path")
+    loop_daemon.add_argument("--task-id", required=True, help="Task id to watch")
+    loop_daemon.add_argument("--goal", help="Optional task goal")
+    loop_daemon.add_argument("--poll-interval", type=float, default=2.0)
+    loop_daemon.add_argument(
+        "--max-cycles",
+        type=int,
+        help="Optional safety limit; default runs until interrupted",
+    )
+    loop_daemon.add_argument(
+        "--fallback-action",
+        default="edit_file",
+        help="Body action when no reflection exists yet",
+    )
+    loop_daemon.add_argument(
+        "--no-record-reflection",
+        action="store_true",
+        help="Observe without appending new reflection records",
+    )
+
     hermes_parser = subparsers.add_parser("hermes", help="Hermes Citta Skill commands")
     hermes_subparsers = hermes_parser.add_subparsers(dest="hermes_command", required=True)
     hermes_observe = hermes_subparsers.add_parser(
@@ -34,6 +94,10 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.command == "tool":
         return _run_tool(args.tool_name, args.json)
+    if args.command == "loop" and args.loop_command == "run":
+        return _run_loop(args)
+    if args.command == "loop" and args.loop_command == "daemon":
+        return _run_daemon(args)
     if args.command == "hermes" and args.hermes_command == "observe":
         return _run_hermes_observe(args)
     parser.error(f"unknown command: {args.command}")
@@ -53,6 +117,94 @@ def _run_tool(tool_name: str, json_input: str) -> int:
     result = dispatch_tool(tool_name, payload)
     _print_json(result)
     return 0 if result.get("ok") else 1
+
+
+def _loop_paths(args: argparse.Namespace) -> tuple[dict[str, Any], int]:
+    try:
+        config = load_config(args.config) if args.config else None
+    except (FileNotFoundError, ValueError) as exc:
+        _print_json({"ok": False, "error": str(exc)})
+        return {}, 2
+
+    trace_path = args.trace or (config.trace_path if config else None)
+    if not trace_path:
+        _print_json({"ok": False, "error": "trace path is required via --trace or --config"})
+        return {}, 2
+
+    return {
+        "trace_path": trace_path,
+        "reflections_path": args.reflections or str(default_reflections_path(trace_path)),
+        "actions_path": args.actions or (config.actions_path if config else None),
+        "dashboard_path": args.dashboard or (config.dashboard_path if config else None),
+        "goal": args.goal if args.goal is not None else (config.goal if config else None),
+        "refresh_interval_seconds": config.refresh_interval_seconds if config else 0,
+        "task_id": args.task_id,
+        "record_reflection": not args.no_record_reflection,
+        "fallback_action": args.fallback_action,
+    }, 0
+
+
+def _run_loop(args: argparse.Namespace) -> int:
+    paths, exit_code = _loop_paths(args)
+    if exit_code != 0:
+        return exit_code
+
+    try:
+        result = run_reflective_loop(
+            paths["trace_path"],
+            task_id=paths["task_id"],
+            goal=paths["goal"],
+            actions_path=paths["actions_path"],
+            reflections_path=paths["reflections_path"],
+            dashboard_path=paths["dashboard_path"],
+            max_iterations=args.max_iterations,
+            record_reflection=paths["record_reflection"],
+            fallback_action=paths["fallback_action"],
+            refresh_interval_seconds=paths["refresh_interval_seconds"],
+        )
+    except ValueError as exc:
+        _print_json({"ok": False, "error": str(exc)})
+        return 2
+
+    _print_json(result)
+    return 0
+
+
+def _run_daemon(args: argparse.Namespace) -> int:
+    paths, exit_code = _loop_paths(args)
+    if exit_code != 0:
+        return exit_code
+
+    stop_requested = False
+
+    def _handle_signal(_signum: int, _frame: object) -> None:
+        nonlocal stop_requested
+        stop_requested = True
+
+    signal.signal(signal.SIGINT, _handle_signal)
+    signal.signal(signal.SIGTERM, _handle_signal)
+
+    try:
+        result = run_reflective_daemon(
+            paths["trace_path"],
+            task_id=paths["task_id"],
+            goal=paths["goal"],
+            actions_path=paths["actions_path"],
+            reflections_path=paths["reflections_path"],
+            dashboard_path=paths["dashboard_path"],
+            poll_interval_seconds=args.poll_interval,
+            record_reflection=paths["record_reflection"],
+            fallback_action=paths["fallback_action"],
+            refresh_interval_seconds=paths["refresh_interval_seconds"],
+            max_cycles=args.max_cycles,
+            should_stop=lambda: stop_requested,
+        )
+    except ValueError as exc:
+        _print_json({"ok": False, "error": str(exc)})
+        return 2
+
+    _print_json(result)
+    return 0
 
 
 def _print_json(value: dict[str, Any]) -> None:
