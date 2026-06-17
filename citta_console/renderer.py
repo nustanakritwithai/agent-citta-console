@@ -110,6 +110,44 @@ def render_reflection_panel(reflection: dict[str, Any] | None) -> str:
     )
 
 
+def render_reflection_insights(insights: dict[str, Any]) -> str:
+    if not insights or insights.get("total_reflections", 0) == 0:
+        return '<p class="empty">No reflection insights yet.</p>'
+
+    rows = [
+        ("Total reflections", insights.get("total_reflections")),
+        ("Most repeated lesson count", insights.get("most_repeated_lesson_count")),
+        ("Most repeated mistake count", insights.get("most_repeated_mistake_count")),
+        (
+            "Repeated lesson ignored",
+            "yes" if insights.get("repeated_lesson_ignored") else "no",
+        ),
+    ]
+    body = []
+    for label, value in rows:
+        body.append(
+            "<tr>"
+            f"<th>{escape(label)}</th>"
+            f"<td>{_value(value)}</td>"
+            "</tr>"
+        )
+
+    lesson = insights.get("most_repeated_lesson")
+    if lesson:
+        body.append(
+            "<tr>"
+            f"<th>Most repeated lesson</th>"
+            f"<td>{_value(lesson)}</td>"
+            "</tr>"
+        )
+
+    return (
+        '<table class="reflection-table"><tbody>'
+        + "\n".join(body)
+        + "</tbody></table>"
+    )
+
+
 def render_reflection_history(reflections: list[dict[str, Any]]) -> str:
     if not reflections:
         return '<p class="empty">No reflection history yet.</p>'
@@ -235,6 +273,7 @@ def render_dashboard_html(
     action_history = [to_dict(action) for action in report.get("action_history", [])]
     reflection = report.get("reflection")
     reflection_history = [to_dict(item) for item in report.get("reflection_history", [])]
+    reflection_insights = report.get("reflection_insights") or {}
     agents = report.get("active_agents", [])
     goal = report.get("goal") or "No goal supplied"
     task_id = str(report.get("task_id", "default"))
@@ -283,6 +322,12 @@ def render_dashboard_html(
       <h2>Self-Reflection</h2>
       <p class="empty">Contextual post-action reflection recorded as JSONL evidence. Not a claim of consciousness.</p>
       {render_reflection_panel(reflection if isinstance(reflection, dict) else None)}
+    </section>
+
+    <section>
+      <h2>Reflection Insights</h2>
+      <p class="empty">Lesson-aware signals derived from reflection history. Not consciousness.</p>
+      {render_reflection_insights(reflection_insights if isinstance(reflection_insights, dict) else {})}
     </section>
 
     <section>

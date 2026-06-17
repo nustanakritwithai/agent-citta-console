@@ -60,16 +60,56 @@ def _add(
 def recommend_actions(
     analysis: dict[str, Any],
     risks: list[dict[str, Any]] | None = None,
+    reflection_insights: dict[str, Any] | None = None,
 ) -> list[dict[str, Any]]:
     risks = risks or []
+    reflection_insights = reflection_insights or {}
     current_state = analysis.get("current_state", "trace_observed")
     risk_types = {risk.get("type") for risk in risks}
     recommendations: list[RecommendedAction] = []
 
-    if "edit_after_failed_test" in risk_types or current_state == "test_failed_after_file_edit":
+    if "repeated_lesson_ignored" in risk_types or reflection_insights.get(
+        "repeated_lesson_ignored"
+    ):
+        _add(
+            recommendations,
+            "ask_user",
+            "The same lesson was recorded multiple times without changing behavior.",
+        )
+        _add(
+            recommendations,
+            "pause",
+            "Pause to break the repeated mistake pattern before continuing.",
+        )
+        lesson_loop = True
+    elif "same_mistake_twice" in risk_types:
+        _add(
+            recommendations,
+            "ask_user",
+            "The same mistake pattern appeared in multiple reflections.",
+        )
+        _add(
+            recommendations,
+            "pause",
+            "Pause before the repeated mistake pattern continues.",
+        )
+        _add(
+            recommendations,
+            "summarize_state",
+            "Review prior reflections and the current trace together.",
+        )
+        lesson_loop = True
+    else:
+        lesson_loop = False
+
+    if not lesson_loop and (
+        "edit_after_failed_test" in risk_types or current_state == "test_failed_after_file_edit"
+    ):
         _add(recommendations, "inspect_error", "A test failed and edits continued afterward.")
         _add(recommendations, "pause", "Pause before more edits hide the root cause.")
-    if "failed_event_detected" in risk_types or current_state in {"test_failed", "event_failed"}:
+    if not lesson_loop and (
+        "failed_event_detected" in risk_types or current_state in {"test_failed", "event_failed"}
+    ):
         _add(recommendations, "inspect_error", "A failed event needs diagnosis.")
     if "no_test_after_code_edit" in risk_types or current_state == "code_changed_no_test":
         _add(recommendations, "run_tests", "Code changed without a later test event.")
