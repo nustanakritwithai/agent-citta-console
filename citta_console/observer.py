@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from .analyzer import analyze_current_state
+from .body_policy import extract_body_loop_status
 from .dispatcher import read_actions
 from .recommender import recommend_actions
 from .reflection import build_reflection, read_reflections, write_reflection
@@ -66,6 +67,8 @@ def _build_observation(
             analysis=analysis,
         )
 
+    body_loop_status = extract_body_loop_status(event_dicts)
+
     return CittaReport(
         time=now_iso(),
         task_id=active_task_id,
@@ -83,6 +86,7 @@ def _build_observation(
         reflection=reflection,
         reflection_history=reflection_history,
         reflection_insights=reflection_insights,
+        body_loop_status=body_loop_status,
     ).to_dict()
 
 

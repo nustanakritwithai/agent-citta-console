@@ -1,6 +1,14 @@
 """agent-citta-console core package."""
 
 from .analyzer import analyze_current_state
+from .body_policy import (
+    append_reflective_trace_event,
+    choose_action_from_reflection,
+    extract_body_loop_status,
+    is_lesson_applied,
+    parse_recommended_action,
+    plan_reflective_action,
+)
 from .config import default_config, load_config
 from .dispatcher import dispatch_action
 from .observer import observe, observe_with_adapter
@@ -15,16 +23,22 @@ from .trace_reader import read_recent_events, read_trace
 __all__ = [
     "analyze_current_state",
     "analyze_reflection_history",
+    "append_reflective_trace_event",
     "build_reflection",
+    "choose_action_from_reflection",
     "detect_risks",
     "detect_reflection_risks",
     "dispatch_action",
     "dispatch_tool",
     "default_config",
+    "extract_body_loop_status",
+    "is_lesson_applied",
     "list_tool_definitions",
     "load_config",
     "observe",
     "observe_with_adapter",
+    "parse_recommended_action",
+    "plan_reflective_action",
     "read_recent_events",
     "read_reflections",
     "read_trace",

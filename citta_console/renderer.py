@@ -148,6 +148,39 @@ def render_reflection_insights(insights: dict[str, Any]) -> str:
     )
 
 
+def render_body_loop_status(status: dict[str, Any]) -> str:
+    loop_status = str(status.get("body_loop_status") or "no_reflective_body_event")
+    lesson_applied = status.get("lesson_applied")
+    if lesson_applied is True:
+        badge = '<span class="status status-confirmed">lesson applied: yes</span>'
+    elif lesson_applied is False:
+        badge = '<span class="status status-blocked">lesson applied: no</span>'
+    else:
+        badge = '<span class="status">lesson applied: n/a</span>'
+
+    rows = [
+        ("Body loop status", loop_status),
+        ("Lesson applied", lesson_applied),
+        ("Applied recommendation", status.get("applied_recommendation")),
+        ("Source reflection", status.get("source_reflection_id")),
+        ("Body agent", status.get("body_agent")),
+    ]
+    table_rows = []
+    for label, value in rows:
+        table_rows.append(
+            "<tr>"
+            f"<th>{escape(label)}</th>"
+            f"<td>{_value(value)}</td>"
+            "</tr>"
+        )
+    return (
+        f"<p>{badge}</p>"
+        '<table class="reflection-table"><tbody>'
+        + "\n".join(table_rows)
+        + "</tbody></table>"
+    )
+
+
 def render_reflection_history(reflections: list[dict[str, Any]]) -> str:
     if not reflections:
         return '<p class="empty">No reflection history yet.</p>'
@@ -274,6 +307,7 @@ def render_dashboard_html(
     reflection = report.get("reflection")
     reflection_history = [to_dict(item) for item in report.get("reflection_history", [])]
     reflection_insights = report.get("reflection_insights") or {}
+    body_loop_status = report.get("body_loop_status") or {}
     agents = report.get("active_agents", [])
     goal = report.get("goal") or "No goal supplied"
     task_id = str(report.get("task_id", "default"))
@@ -322,6 +356,12 @@ def render_dashboard_html(
       <h2>Self-Reflection</h2>
       <p class="empty">Contextual post-action reflection recorded as JSONL evidence. Not a claim of consciousness.</p>
       {render_reflection_panel(reflection if isinstance(reflection, dict) else None)}
+    </section>
+
+    <section>
+      <h2>Reflective Body Loop</h2>
+      <p class="empty">Shows whether the body agent applied the latest reflection lesson. Rule-based only.</p>
+      {render_body_loop_status(body_loop_status if isinstance(body_loop_status, dict) else {})}
     </section>
 
     <section>
