@@ -10,6 +10,7 @@ from ..config import CittaConfig, load_config
 from ..dispatcher import dispatch_action, read_actions
 from ..memory import summarize_reflection_history
 from ..observer import observe, observe_with_adapter
+from ..reflective_loop import run_reflective_loop
 from ..renderer import render_dashboard
 from ..trace_reader import events_to_dicts, read_trace
 
@@ -111,6 +112,26 @@ def handle_summarize_reflections(payload: dict[str, Any]) -> dict[str, Any]:
         mistake_limit=mistake_limit,
     )
     return {"ok": True, "memory": memory}
+
+
+def handle_run_reflective_loop(payload: dict[str, Any]) -> dict[str, Any]:
+    max_iterations = payload.get("max_iterations", 5)
+    if not isinstance(max_iterations, int) or isinstance(max_iterations, bool) or max_iterations < 1:
+        raise ValueError("max_iterations must be an integer >= 1")
+
+    result = run_reflective_loop(
+        _required_str(payload, "trace_path"),
+        task_id=_required_str(payload, "task_id"),
+        goal=payload.get("goal"),
+        actions_path=payload.get("actions_path"),
+        reflections_path=payload.get("reflections_path"),
+        dashboard_path=payload.get("dashboard_path"),
+        max_iterations=max_iterations,
+        record_reflection=bool(payload.get("record_reflection", True)),
+        fallback_action=str(payload.get("fallback_action", "edit_file")),
+        refresh_interval_seconds=int(payload.get("refresh_interval_seconds", 0)),
+    )
+    return result
 
 
 def _required_str(payload: dict[str, Any], key: str) -> str:

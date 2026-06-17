@@ -104,6 +104,14 @@ TOOLS: dict[str, ToolDefinition] = {
         safety_level="safe",
         handler=handlers.handle_summarize_reflections,
     ),
+    "citta.run_reflective_loop": ToolDefinition(
+        name="citta.run_reflective_loop",
+        description="Run the automatic observe-reflect-act loop for a reflective body agent.",
+        input_schema=schemas.RUN_REFLECTIVE_LOOP_INPUT_SCHEMA,
+        output_schema=schemas.RUN_REFLECTIVE_LOOP_OUTPUT_SCHEMA,
+        safety_level="safe",
+        handler=handlers.handle_run_reflective_loop,
+    ),
 }
 
 

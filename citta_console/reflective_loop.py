@@ -1,0 +1,166 @@
+"""Automatic reflective body loop runner.
+
+Runs observe -> record reflection -> reflective body act in a loop until a
+safe stop condition is reached. This is rule-based orchestration only.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any
+
+from .body_policy import append_reflective_trace_event
+from .observer import observe
+from .renderer import render_dashboard
+from .trace_reader import events_to_dicts, filter_events_by_task, read_trace
+
+BLOCKING_BODY_ACTIONS = {"pause", "ask_user", "stop"}
+
+
+def default_reflections_path(trace_path: str | Path) -> Path:
+    return Path(trace_path).with_name("reflections.jsonl")
+
+
+def _applied_reflection_ids(events: list[dict[str, Any]]) -> set[str]:
+    applied: set[str] = set()
+    for event in events:
+        metadata = event.get("metadata")
+        if not isinstance(metadata, dict):
+            continue
+        reflection_id = metadata.get("source_reflection_id")
+        if reflection_id:
+            applied.add(str(reflection_id))
+    return applied
+
+
+def _load_task_events(trace_path: str | Path, task_id: str) -> list[dict[str, Any]]:
+    events = read_trace(trace_path)
+    return events_to_dicts(filter_events_by_task(events, task_id))
+
+
+def run_reflective_loop(
+    trace_path: str | Path,
+    *,
+    task_id: str,
+    goal: str | None = None,
+    actions_path: str | Path | None = None,
+    reflections_path: str | Path | None = None,
+    dashboard_path: str | Path | None = None,
+    max_iterations: int = 5,
+    record_reflection: bool = True,
+    fallback_action: str = "edit_file",
+    refresh_interval_seconds: int = 0,
+) -> dict[str, Any]:
+    """Run the reflective body loop until a stop condition is met."""
+
+    if max_iterations < 1:
+        raise ValueError("max_iterations must be >= 1")
+
+    trace_file = Path(trace_path)
+    reflections_file = (
+        Path(reflections_path)
+        if reflections_path is not None
+        else default_reflections_path(trace_file)
+    )
+
+    steps: list[dict[str, Any]] = []
+    stop_reason = "max_iterations"
+
+    for iteration in range(1, max_iterations + 1):
+        report = observe(
+            trace_file,
+            task_id=task_id,
+            goal=goal,
+            actions_path=actions_path,
+            reflections_path=reflections_file,
+            record_reflection=record_reflection,
+        )
+
+        reflection = report.get("reflection") or {}
+        reflection_id = reflection.get("reflection_id")
+        event_dicts = _load_task_events(trace_file, task_id)
+
+        if report.get("body_loop_status", {}).get("lesson_applied") is True:
+            stop_reason = "lesson_applied"
+            steps.append(
+                {
+                    "iteration": iteration,
+                    "phase": "observe",
+                    "decision": report.get("decision"),
+                    "body_action": None,
+                    "lesson_applied": True,
+                    "reflection_id": reflection_id,
+                }
+            )
+            break
+
+        if reflection_id and reflection_id in _applied_reflection_ids(event_dicts):
+            stop_reason = "reflection_already_applied"
+            steps.append(
+                {
+                    "iteration": iteration,
+                    "phase": "observe",
+                    "decision": report.get("decision"),
+                    "body_action": None,
+                    "lesson_applied": None,
+                    "reflection_id": reflection_id,
+                }
+            )
+            break
+
+        body_event = append_reflective_trace_event(
+            trace_file,
+            reflections_file,
+            task_id=task_id,
+            fallback=fallback_action,
+        )
+        body_metadata = body_event.get("metadata") or {}
+        lesson_applied = body_metadata.get("lesson_applied")
+        body_action = body_event.get("action")
+
+        steps.append(
+            {
+                "iteration": iteration,
+                "phase": "act",
+                "decision": report.get("decision"),
+                "body_action": body_action,
+                "lesson_applied": lesson_applied,
+                "reflection_id": reflection_id,
+                "body_status": body_event.get("status"),
+            }
+        )
+
+        if body_action in BLOCKING_BODY_ACTIONS or body_event.get("status") == "blocked":
+            stop_reason = "body_blocked"
+            break
+        if lesson_applied is True:
+            stop_reason = "lesson_applied"
+            break
+
+    final_report = observe(
+        trace_file,
+        task_id=task_id,
+        goal=goal,
+        actions_path=actions_path,
+        reflections_path=reflections_file,
+        record_reflection=False,
+    )
+
+    if dashboard_path is not None:
+        render_dashboard(
+            final_report,
+            dashboard_path,
+            refresh_interval_seconds=refresh_interval_seconds,
+        )
+
+    return {
+        "ok": True,
+        "task_id": task_id,
+        "iterations": len(steps),
+        "stop_reason": stop_reason,
+        "steps": steps,
+        "final_report": final_report,
+        "trace_path": str(trace_file),
+        "reflections_path": str(reflections_file),
+        "dashboard_path": str(dashboard_path) if dashboard_path is not None else None,
+    }

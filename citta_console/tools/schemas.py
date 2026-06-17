@@ -143,3 +143,29 @@ SUMMARIZE_REFLECTIONS_OUTPUT_SCHEMA = object_schema(
     },
     required=["ok", "memory"],
 )
+
+RUN_REFLECTIVE_LOOP_INPUT_SCHEMA = object_schema(
+    {
+        **PATH_PROPS,
+        "reflections_path": {"type": ["string", "null"]},
+        "max_iterations": {"type": "integer"},
+        "record_reflection": {"type": "boolean"},
+        "fallback_action": {"type": "string"},
+        "refresh_interval_seconds": {"type": "integer"},
+    },
+    required=["trace_path", "task_id"],
+)
+RUN_REFLECTIVE_LOOP_OUTPUT_SCHEMA = object_schema(
+    {
+        **OK_SCHEMA,
+        "task_id": {"type": "string"},
+        "iterations": {"type": "integer"},
+        "stop_reason": {"type": "string"},
+        "steps": {"type": "array"},
+        "final_report": {"type": "object"},
+        "trace_path": {"type": "string"},
+        "reflections_path": {"type": "string"},
+        "dashboard_path": {"type": ["string", "null"]},
+    },
+    required=["ok", "task_id", "iterations", "stop_reason", "steps", "final_report"],
+)
