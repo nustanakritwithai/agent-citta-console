@@ -17,6 +17,20 @@ to review.
 The hook also makes no real consciousness claim. Terms such as `vipaka_check` are
 used as local runtime trace labels only.
 
+## Redaction / secret masking
+
+Before a trace event is written to JSONL, Citta applies a local, deterministic,
+best-effort redaction pass to `input`, `output`, `error`, `metadata`, and nested
+values. Secret-like values are replaced with `[REDACTED]`.
+
+The redactor masks common patterns such as Authorization headers, bearer tokens,
+API-key environment assignments, passwords, cookies, private key blocks, GitHub
+tokens, and nested values whose key names include `api_key`, `token`, `secret`,
+`password`, `cookie`, or `authorization`.
+
+Redaction is best-effort, not a guarantee. Do not intentionally put secrets in
+traces. The runtime hook remains opt-in and disabled by default.
+
 ## Opt-in environment variables
 
 Tracing is disabled unless explicitly enabled:
@@ -110,5 +124,6 @@ Expected risk/action signals include:
 - It is disabled by default.
 - It records only events provided by the caller.
 - It does not execute recommended actions.
-- It does not handle secrets/tokens specially; callers should not pass secrets
-  into metadata, input, output, or error fields.
+- Redaction is best-effort and not a guarantee; callers should not pass secrets
+  into metadata, input, output, or error fields intentionally.
+- It does not execute recommended actions.

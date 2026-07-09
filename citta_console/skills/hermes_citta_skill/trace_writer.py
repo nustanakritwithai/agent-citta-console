@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from citta_console.redaction import redact_event
 from citta_console.schemas import now_iso, validate_event
 
 
@@ -50,6 +51,7 @@ def append_citta_event(
         "error": error,
         "metadata": metadata or {},
     }
+    event = redact_event(event)
     validate_event(event)
     with path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(event, ensure_ascii=False, sort_keys=True) + "\n")

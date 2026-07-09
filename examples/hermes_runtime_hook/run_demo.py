@@ -25,20 +25,20 @@ def main() -> int:
         TRACE_PATH,
         enabled=True,
         default_task_id=TASK_ID,
-        default_metadata={"notes": "controlled Hermes runtime hook demo"},
+        default_metadata={"notes": "controlled Hermes runtime hook demo", "api_key": "sk-demo123456789"},
     )
 
     hook.record_user_input("Improve UI and keep tests passing")
     hook.record_file_edit(
         "src/ui.py",
-        output="Initial UI edit recorded",
-        metadata={"confidence": 0.62, "goal_alignment": "medium"},
+        output="Initial UI edit recorded with Authorization: Bearer demo123",
+        metadata={"confidence": 0.62, "goal_alignment": "medium", "token": "ghp_abcdefghijklmnopqrstuvwxyz123456"},
     )
     hook.record_command_result(
         "python -m pytest",
         status="failed",
-        error="test_ui_render failed",
-        metadata={"source_state": "test_failed_after_file_edit"},
+        error="test_ui_render failed; Cookie: sessionid=demo123",
+        metadata={"source_state": "test_failed_after_file_edit", "authorization": "Bearer demo123"},
     )
     hook.record_file_edit(
         "src/ui.py",

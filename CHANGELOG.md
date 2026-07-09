@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.10.0 - Redaction / Secret Masking
+
+- Added best-effort redaction layer for trace events
+- Masks Authorization headers, bearer tokens, API keys, passwords, cookies, private keys, and common token patterns
+- Applies redaction before Hermes Citta Skill and runtime hook trace writes
+- Added tests for nested metadata redaction
+- Updated docs with safety guidance
+
 ## v0.9.0 - Hermes Runtime Trace Hook
 
 - Added opt-in Hermes runtime trace hook

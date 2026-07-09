@@ -23,6 +23,7 @@ dashboard insight.
 ```text
 Hermes-style activity
   -> trace_writer.py
+  -> best-effort redaction
   -> citta_trace.jsonl
   -> Citta observer
   -> risk detector
@@ -55,6 +56,21 @@ metadata to detect `goal_drift_possible` and recommend `redirect`. For example,
 if a task goal is "Improve UI and fix test failures" but the trace shows another
 visual refactor after a failed test with `inspected_error=false`, the observer can
 report goal drift without executing any action.
+
+## Redaction / secret masking
+
+Before JSONL trace writes, the trace writer applies a local, deterministic,
+best-effort redaction pass. It masks common secret patterns in `input`, `output`,
+`error`, metadata, and nested dict/list values. Secret-like values are replaced
+with `[REDACTED]`.
+
+Covered patterns include Authorization headers, bearer tokens, API key env-style
+assignments, passwords, cookies, private key blocks, GitHub tokens, and nested
+values whose key names include `api_key`, `token`, `secret`, `password`,
+`cookie`, or `authorization`.
+
+Redaction is best-effort, not a guarantee. Do not intentionally put secrets in
+traces.
 
 ## Example command
 
